@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Raleway:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #0F0F11;
+            box-sizing: border-box;
+        }
+        
+        body {
+            padding: 64px 0;
+            padding-top: 82px;
+        }
+        
+        .card-container {
+            display: flex;
+            max-width: 100vw;
+            width: 100vw;
+            overflow-x: auto;
+            padding-left: 64px;
+        }
+        
+        .card-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        h2 {
+            font-family: 'Heebo', sans-serif;
+            color: #fff;
+            margin: 0;
+            margin-top: 6px;
+            margin-bottom: 4px;
+            padding-left: 64px;
+        }
+        
+        .header {
+            width: 100vw;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 24px 16px;
+            border-bottom: 2px solid #19181D;
+            -webkit-app-region: drag;
+            z-index: 100;
+        }
+        
+        .header img {
+            height: 28px;
+        }
+        
+        .close {
+            opacity: .8;
+            transform: scale(1);
+            transition: .2s ease all;
+            z-index: 10;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+        }
+        
+        .close:hover {
+            opacity: 1;
+            transform: scale(1.1);
+            transition: .2s ease all;
+        }
+    </style>
+    <script src="/listeners.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.svg"/>
+        <img class="close js-close" src="close.svg"/>
+    </div>
+    <h2>Mod.io maps</h2>
+    <div class="card-container mod-io-container">
+        
+    </div>
+    
+    <h2>Local maps</h2>
+    <div class="card-container local-container">
+        
+    </div>
+</body>
+<script src="./index.js" type="module"></script>
+<script>
+    let close = document.querySelector(".js-close");
+    close.addEventListener("click", () => {
+        fetch("/internal/minimize",() =>{});
+    });
+</script>
+</html>
