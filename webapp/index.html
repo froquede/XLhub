@@ -20,6 +20,7 @@
         body {
             padding: 64px 0;
             padding-top: 82px;
+            margin: 0;
         }
         
         .card-container {
@@ -28,6 +29,10 @@
             width: 100vw;
             overflow-x: auto;
             padding-left: 64px;
+            padding-right: 64px;
+            box-sizing: border-box;
+            transition: .2s ease all;
+            cursor: grab;
         }
         
         .card-container::-webkit-scrollbar {
@@ -77,6 +82,16 @@
             transform: scale(1.1);
             transition: .2s ease all;
         }
+
+        loader-animation {
+            display: none;
+        }
+
+        .loading loader-animation {
+            display: flex;
+            width: 320px;
+            height: 188px;
+        }
     </style>
     <script src="/listeners.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -87,15 +102,14 @@
         <img class="close js-close" src="close.svg"/>
     </div>
     <h2>Mod.io maps</h2>
-    <div class="card-container mod-io-container">
-        
-    </div>
+    <div class="card-container mod-io-container loading dragscroll"></div>
     
     <h2>Local maps</h2>
-    <div class="card-container local-container">
-        
+    <div class="card-container local-container loading dragscroll">
+        <loader-animation></loader-animation>
     </div>
 </body>
+<script src="./dragscroll.js"></script>
 <script src="./index.js" type="module"></script>
 <script>
     let close = document.querySelector(".js-close");
