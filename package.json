@@ -31,7 +31,9 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./webapp/MapHubIcon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

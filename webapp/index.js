@@ -3,6 +3,147 @@ import './loader-animation.js';
 import './map-card.js';
 
 const socket = io();
+const token = localStorage.getItem("modio-token");
+if (!token) {
+    document.querySelector(".modio-token").classList.remove("disabled");
+}
+
+document.querySelector(".js-send-modio").addEventListener("click", (evt) => {
+    let email = (document.querySelector(".js-email").value + '').split(" ").join("");
+    if (email.split("@").length > 1 && email.length >= 5) {
+        document.querySelector(".input-container").classList.add("loading");
+        requestSecurityCode(email);
+    }
+});
+
+document.querySelector(".js-send-code").addEventListener("click", (evt) => {
+    let code = (document.querySelector(".js-code").value + '').split(" ").join("");
+    if (code.length == 5) {
+        document.querySelector(".input-container").classList.add("loading");
+        document.querySelector(".input-container").classList.remove("step2");
+        confirmSecurityCode(code);
+    }
+});
+
+let modio_filter = { filter: "date_updated", sorting: "desc" };
+document.querySelectorAll('.js-filter[type="modio"]').forEach(el => el.addEventListener("click", onFilter));
+
+let local_filter = { filter: "mtimeMs", sorting: "desc" };
+document.querySelectorAll('.js-filter[type="local"]').forEach(el => el.addEventListener("click", onFilter));
+
+function onFilter(event) {
+    let target = event.currentTarget;
+    let filter = target.getAttribute("data-filter");
+    if(target.getAttribute("type") == "local") {
+        if (filter == local_filter.filter) {
+            toggleLocalSorting();
+        }
+        else {
+            selectLocalSorting(filter);
+        }
+        
+        getLocal(true);
+    }
+    else {
+        if (modio_loading) return;
+
+        if (filter == modio_filter.filter) {
+            toggleModioSorting(filter);
+        }
+        else {
+            selectModioSorting(filter);
+        }
+        
+        actual_page = 0;
+        getModio(actual_page, true);
+    }
+}
+
+function selectLocalSorting(filter) {
+    document.querySelector('[data-filter="' + local_filter.filter + '"][type="local"]').classList.remove("__" + local_filter.sorting);
+    
+    local_filter.filter = filter;
+    local_filter.sorting = "desc";
+    
+    document.querySelector('.js-filter.active[type="local"]').classList.remove('active');
+    document.querySelector('[data-filter="' + local_filter.filter + '"][type="local"]').classList.add('active');
+    document.querySelector('[data-filter="' + local_filter.filter + '"][type="local"]').classList.add("__" + local_filter.sorting);
+}
+
+function selectModioSorting(filter) {
+    document.querySelector('[data-filter="' + modio_filter.filter + '"][type="modio"]').classList.remove("__" + modio_filter.sorting);
+    
+    modio_filter.filter = filter;
+    modio_filter.sorting = "desc";
+    
+    document.querySelector('.js-filter.active[type="modio"]').classList.remove('active');
+    document.querySelector('[data-filter="' + modio_filter.filter + '"][type="modio"]').classList.add('active');
+    document.querySelector('[data-filter="' + modio_filter.filter + '"][type="modio"]').classList.add("__" + modio_filter.sorting);
+}
+
+function toggleLocalSorting() {
+    document.querySelector('[data-filter="' + local_filter.filter + '"][type="local"]').classList.remove("__" + local_filter.sorting);
+    local_filter.sorting = local_filter.sorting == "desc" ? "asc" : "desc";
+    document.querySelector('[data-filter="' + local_filter.filter + '"][type="local"]').classList.add("__" + local_filter.sorting);
+}
+
+function toggleModioSorting() {
+    document.querySelector('[data-filter="' + modio_filter.filter + '"][type="modio"]').classList.remove("__" + modio_filter.sorting);
+    modio_filter.sorting = modio_filter.sorting == "desc" ? "asc" : "desc";
+    document.querySelector('[data-filter="' + modio_filter.filter + '"][type="modio"]').classList.add("__" + modio_filter.sorting);
+}
+
+function requestSecurityCode(email) {
+    const data = new URLSearchParams();
+    data.append("email", email);
+    fetch("https://api.mod.io/v1/oauth/emailrequest?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
+    method: 'POST',
+    body: data,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+}).then(response => response.json()).then(data => {
+    if(!data.error) {
+        if(data.code == 200) {
+            document.querySelector(".input-container").classList.remove("loading");
+            document.querySelector(".input-container").classList.add("step2");
+            document.querySelector(".js-code-message").innerHTML = data.message;
+            document.querySelector(".js-code-message").classList.remove("disabled");
+        }
+    }
+    else{
+        alert(data.error.message);
+    }
+}).catch(err => {
+    alert(err);
+})
+}
+
+function confirmSecurityCode(code) {
+    const data = new URLSearchParams();
+    data.append("security_code", code);
+    fetch("https://api.mod.io/v1/oauth/emailexchange?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
+    method: 'POST',
+    body: data,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+}).then(response => response.json()).then(data => {
+    if(!data.error) {
+        if(data.code == 200) {
+            localStorage.setItem("modio-token", data.access_token);
+            window.location.reload();
+        }
+    }
+    else{
+        document.querySelector(".input-container").classList.remove("loading");
+        document.querySelector(".input-container").classList.add("step2");
+        alert(data.error.message);
+    }
+}).catch(err => {
+    alert(err);
+})
+}
 
 socket.on("download-percentage", message => { window.on("download-percentage", message); })
 socket.on("extracting-download", message => { window.on("extracting-download", message); })
@@ -12,34 +153,48 @@ socket.on("extracting-finished", message => {
 });
 
 let modio_data = []
-function getModio(page = 0) {
+const controllerModio = new AbortController();
+const { signalModio } = controllerModio;
+let modio_loading = false;
+
+function getModio(page = 0, refresh) {
+    modio_loading = true;
+    controllerModio.abort();
+    if(refresh) modio_data = [];
     document.querySelector(".mod-io-container").classList.add("loading");
     modio_data.push(html`<loader-animation></loader-animation>`);
     render(modio_data, document.querySelector(".mod-io-container"));
-    window.fetch("/modio/maps?page=" + page).then(res => res.json()).then(data => {
+
+    window.fetch("/modio/maps?page=" + page + "&token=" + localStorage.getItem("modio-token") + "&filter=" + modio_filter.filter + "&sorting=" + modio_filter.sorting + "&search=" + modio_search, {signal: signalModio}).then(res => res.json()).then(data => {    
         for(let map of data.data) {
             modio_data.push(html`<map-card data='${JSON.stringify(map)}'></map-card>`);
         }
         
         document.querySelector(".mod-io-container").classList.remove("loading");
         render(modio_data, document.querySelector(".mod-io-container"));
-        loading = false;
+        
+        if(refresh) document.querySelector(".mod-io-container").scrollLeft = 0;
+
+        setTimeout(() => {modio_loading = false;}, 0);
     });
 }
 
-function getLocal() {
+function getLocal(refresh = false) {
     document.querySelector(".local-container").classList.add("loading");
-    window.fetch("/local/maps").then(res => res.json()).then(data => {
+    window.fetch("/local/maps?filter=" + local_filter.filter + "&sorting=" + local_filter.sorting).then(res => res.json()).then(data => {
         let result = [];
         for(let key in data) {
             let map = data[key];
             map.name = key;
-            result.push(html`<map-card type="local" data='${JSON.stringify(map)}'></map-card>`);
+            result.push(html`<map-card type="local" name="${map.name}" data='${JSON.stringify(map)}'></map-card>`);
         }
         
-        console.log(data);
         document.querySelector(".local-container").classList.remove("loading");
         render(result, document.querySelector(".local-container"));
+        
+        if(refresh) document.querySelector(".local-container").scrollLeft = 0;
+
+        if(document.querySelector(".js-search-local").value.split(" ").join("").length > 0) searchLocal();
     });
 }
 
@@ -54,21 +209,61 @@ function addScrollListener(element) {
 }
 
 let actual_page = 0;
-let loading = false;
 function LoadMore(element) {
     element.addEventListener('scroll', (e) => {
         let max_size = (320 * modio_data.length) - 64;
-        if(element.scrollLeft >= max_size - 640 && !loading) {
-            loading = true;
+        if(element.scrollLeft >= max_size - 640 && !modio_loading) {
             actual_page++;
             getModio(actual_page);
         }
     });
 }
 
+function getMe() {
+    window.fetch("https://api.mod.io/v1/me", { headers: { Authorization: "Bearer " + localStorage.getItem("modio-token") }}). then(res => res.json()).then(data => {
+        document.querySelector(".js-username").innerHTML = data.username;
+        document.querySelector(".js-avatar").setAttribute("src", data.avatar.thumb_100x100);
+    });
+}
+
+let modio_search = "";
+function searchModio() {
+    modio_search = document.querySelector(".js-search-modio").value;
+    actual_page = 0;
+    getModio(actual_page, true);
+}
+
+function searchLocal() {
+    let value = document.querySelector(".js-search-local").value;
+    let cards = document.querySelectorAll(".local-container map-card");
+
+    for(let i = 0; i < cards.length; i++) {
+        let name = cards[i].getAttribute("name");
+        var actual = latinize(name.toLowerCase());
+        var stringfilter = latinize(value.toLowerCase());
+        var re = new RegExp(stringfilter, 'g');
+        var res = actual.match(re);
+        if (res == null) cards[i].classList.add("hidden");
+        else cards[i].classList.remove("hidden");
+    }
+}
+
+document.querySelector(".js-search-modio").addEventListener("keydown", (evt) => {
+    if(evt.key === "Enter") searchModio();
+});
+
+document.querySelector(".js-search-local").addEventListener("keydown", (evt) => {
+    if(evt.key === "Enter") searchLocal();
+});
+
+document.querySelector(".js-search-local-img").addEventListener("click", searchLocal);
+
+searchLocal
+
 getModio(actual_page);
 getLocal();
 window.getLocal = getLocal;
+getMe();
 
 addScrollListener(document.querySelector(".mod-io-container"));
 addScrollListener(document.querySelector(".local-container"));

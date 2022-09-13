@@ -16,9 +16,15 @@ function createWindow () {
         webPreferences: {},
         icon: nativeImage.createFromPath(path.resolve(app_path, './webapp/MapHubIcon.ico'))
     });
+    mainWindow.webContents.setFrameRate(60);
     mainWindow.resizable = false;
     mainWindow.loadURL('http://localhost:420')
     mainWindow.setMenuBarVisibility(false);
+
+    // mainWindow.webContents.on('new-window', (e, url) => {
+    //     e.preventDefault();
+    //     require('electron').shell.openExternal(url);
+    // });
 }
 
 let icon;

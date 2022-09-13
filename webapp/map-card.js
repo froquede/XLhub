@@ -12,6 +12,10 @@ export class mapCard extends LitElement {
     height: 188px;
     margin-right: 24px;
   }
+
+  :host(.hidden) {
+    display: none;
+  }
   
   :host .image, :host .local-cover {
     width: 320px;
@@ -224,7 +228,7 @@ export class mapCard extends LitElement {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id})
+      body: JSON.stringify({id, token: localStorage.getItem("modio-token")})
     }).then(res => {
       console.dir(res);
       if(res.status == 200) {

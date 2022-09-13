@@ -9,6 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Raleway:wght@300;600&display=swap" rel="stylesheet">
     <style>
+        * {
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+        }
+
         html, body {
             width: 100vw;
             height: 100vh;
@@ -61,7 +67,7 @@
             padding: 24px 16px;
             border-bottom: 2px solid #19181D;
             -webkit-app-region: drag;
-            z-index: 100;
+            z-index: 110;
         }
         
         .header img {
@@ -92,25 +98,293 @@
             width: 320px;
             height: 188px;
         }
+
+        .modio-token {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(0,0,0,.9);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fafafa;
+        }
+
+        .modio-token.disabled {
+            z-index: -1;
+            background: rgba(0, 0, 0, 0);
+        }
+
+        .modio-token .content {
+            width: 60vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'Heebo', sans-serif;
+            text-align: center;
+            padding-top: 24px;
+            box-sizing: border-box;
+        }
+
+        .modio-token .info {
+            color: #b2bec3;
+            font-size: 13px;
+            font-weight: 300;
+            font-family: 'Raleway', sans-serif;
+            margin-top: 24px;
+        }
+
+        input, button {
+            all: unset;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-container.loading input, .input-container.loading button, .input-container.step2 input, .input-container.step2 button {
+            display: none;
+        }
+
+        .input-container .step2{
+            display: none;
+        }
+
+        .input-container.step2 .step2{
+            display: flex;
+        }
+
+        input {
+            height: 42px;
+            border-radius: 4px;
+            background: #36373B;
+            border: 1px solid #606673;
+            padding: 12px;
+            box-sizing: border-box;
+            color: #fafafa;
+            font-family: 'Heebo', sans-serif;
+        }
+
+        button {
+            background: #FEE3AE;
+            height: 42px;
+            font-family: 'Heebo', sans-serif;
+            box-sizing: border-box;
+            padding: 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color:rgba(0, 0, 0, 1);
+            cursor: pointer;
+            transform: scale(1);
+            transition: .2s ease all;
+            margin-left: 4px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            transition: .2s ease all;
+        }
+
+        loader-animation.disabled {
+            display: none;
+        }
+
+        .code-message.disabled {
+            display: none;
+        }
+
+        .code-message {
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .sub-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .filter {
+            display: flex;
+            font-family: 'Raleway', sans-serif;
+            color: #fafafa;
+            margin-left: 8px;
+        }
+
+        .filter .card {
+            font-size: 11px;
+            text-transform: lowercase;
+            font-weight: 300;
+            background: rgba(34,34,34,.75);
+            border-radius: 32px;
+            padding: 5px 14px;
+            box-sizing: border-box;
+            margin-left: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter .card:hover {
+            background: rgba(52,52,52,1);
+            cursor: pointer;
+        }
+
+        .filter .card.active {
+            background: rgba(52,52,52,1);
+            font-weight: 600;
+        }
+
+        .__desc::after {
+            content: "˅";
+            padding-left: 4px;
+            color: #FEE3AE;
+        }
+
+        .__asc::after {
+            content: "˄";
+            padding-left: 4px;
+            color: #FEE3AE;
+        }
+
+        .right, .right .avatar, .left {
+            display: flex;
+            align-items: center;
+        }
+
+        .left p {
+            color: #fafafa;
+            font-family: 'Raleway', sans-serif;
+            margin-right: 16px;
+            font-size: 13px;
+        }
+
+        .avatar img {
+            border-radius: 50%;
+            border: 2px solid #fafafa;
+        }
+
+        .avatar {
+            margin-left: 14px;
+            opacity: .6;
+        }
+
+        .avatar p {
+            margin-left: 12px;
+            font-family: 'Heebo', sans-serif;
+            color: #fafafa;
+            font-size: 14px;
+        }
+
+        .search_bar {
+            margin-left: auto;
+            margin-left: 12px;
+            position: relative;
+        }
+
+        .search_bar input {
+            height: 26px;
+            padding: 0;
+            border-radius: 0;
+            background: rgba(0, 0, 0, 0);
+            border: none;
+            border-bottom: 2px solid rgba(34,34,34,.75);
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px;
+            transition: .2s ease all;
+        }
+
+        .search_bar input:focus {
+            border-bottom: 2px solid rgba(52,52,52,1);
+            transition: .2s ease all;
+        }
+
+        .search_bar img {
+            position: absolute;
+            right: 0;
+            bottom: 7px;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
     </style>
+    <script src="/latinize.js"></script>
     <script src="/listeners.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
     <div class="header">
-        <img src="logo.svg"/>
-        <img class="close js-close" src="close.svg"/>
+        <div class="right">
+            <img src="logo.svg"/>
+            <div class="avatar">
+                <img class="js-avatar"/>
+                <p class="js-username"></p>
+            </div>
+        </div>
+        <div class="left">
+            <p class="version">v1.0.0</p>
+            <img class="close js-close" src="close.svg"/>
+        </div>
     </div>
-    <h2>Mod.io maps</h2>
+
+    <div class="modio-token disabled">
+        <div class="content">
+            <img src="./modio_logo.svg"/>
+            <p style="width: 444px;">For using MAPhub you need to have a mod.io account, enter your account email to receive a security code:</p>
+            <p class="js-code-message code-message disabled"></p>
+            <div class="input-container">
+                <input class="js-email" type="email" placeholder="johndoe@xl.com"/>
+                <button class="js-send-modio">Send</button>
+                <loader-animation class="js-login-loader"></loader-animation>
+                
+                <input class="js-code step2" placeholder="XYZAB" maxlength="5"/>
+                <button class="js-send-code step2">Confirm</button>
+            </div>
+            <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. MAPhub doesn't modify or use your information for anything other than getting the mod.io maps - do not share your security code or token with no one else.</p>
+        </div>
+    </div>
+
+    <div class="sub-header">
+        <h2>Mod.io maps</h2>
+        <div class="filter">
+            <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
+            <div class="js-filter card" data-filter="name" type="modio">Name</div>
+            <div class="js-filter card" data-filter="popular" type="modio">Popular</div>
+            <div class="js-filter card" data-filter="downloads" type="modio">Downloads</div>
+            <div class="js-filter card" data-filter="rating" type="modio">Rating</div>
+            <div class="search_bar">
+                <input placeholder="Search" class="js-search-modio"/>
+                <img src="./search.svg"/>
+            </div>
+        </div>
+    </div>
     <div class="card-container mod-io-container loading dragscroll"></div>
     
-    <h2>Local maps</h2>
+    <div class="sub-header">
+        <h2>Local maps</h2>
+        <div class="filter">
+            <div class="js-filter card active __desc" data-filter="mtimeMs" type="local">Date</div>
+            <div class="js-filter card" data-filter="size" type="local">Size</div>
+            <div class="js-filter card" data-filter="name" type="local">Name</div>
+            <div class="search_bar">
+                <input placeholder="Search" class="js-search-local"/>
+                <img class="js-search-local-img" src="./search.svg"/>
+            </div>
+        </div>
+    </div>
     <div class="card-container local-container loading dragscroll">
         <loader-animation></loader-animation>
     </div>
 </body>
 <script src="./dragscroll.js"></script>
-<script src="./index.js" type="module"></script>
+<script src="./index.js" type="module" async defer></script>
 <script>
     let close = document.querySelector(".js-close");
     close.addEventListener("click", () => {
