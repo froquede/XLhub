@@ -228,7 +228,7 @@ export class mapCard extends LitElement {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id, token: localStorage.getItem("modio-token")})
+      body: JSON.stringify({id, token: localStorage.getItem("modio-token"), custom_path: localStorage.getItem("custom-path")})
     }).then(res => {
       console.dir(res);
       if(res.status == 200) {

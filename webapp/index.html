@@ -314,6 +314,18 @@
             height: 14px;
             cursor: pointer;
         }
+
+        .options {
+            opacity: .4;
+            -webkit-app-region: no-drag;
+            transition: .2s ease all;
+        }
+
+        .options:hover {
+            opacity: 1;
+            cursor: pointer;
+            transition: .2s ease all;
+        }
     </style>
     <script src="/latinize.js"></script>
     <script src="/listeners.js"></script>
@@ -329,7 +341,8 @@
             </div>
         </div>
         <div class="left">
-            <p class="version">v1.0.0</p>
+            <p class="options js-change-folder">change maps folder</p>
+            <p class="version">v1.0.1</p>
             <img class="close js-close" src="close.svg"/>
         </div>
     </div>
@@ -389,6 +402,16 @@
     let close = document.querySelector(".js-close");
     close.addEventListener("click", () => {
         fetch("/internal/minimize",() =>{});
+    });
+
+    let change = document.querySelector(".js-change-folder");
+    change.addEventListener("click", () => {
+        fetch("/internal/path").then(res => res.json()).then(path => {
+            if(path.path) {
+                localStorage.setItem("custom-path", path.path);
+                window.location.reload();
+            }
+        });
     });
 </script>
 </html>

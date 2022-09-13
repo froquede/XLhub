@@ -181,7 +181,8 @@ function getModio(page = 0, refresh) {
 
 function getLocal(refresh = false) {
     document.querySelector(".local-container").classList.add("loading");
-    window.fetch("/local/maps?filter=" + local_filter.filter + "&sorting=" + local_filter.sorting).then(res => res.json()).then(data => {
+    let custom_path = localStorage.getItem("custom-path");
+    window.fetch("/local/maps?filter=" + local_filter.filter + "&sorting=" + local_filter.sorting + (custom_path ? "&custom_path=" + custom_path : "")).then(res => res.json()).then(data => {
         let result = [];
         for(let key in data) {
             let map = data[key];

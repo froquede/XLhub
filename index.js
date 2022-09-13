@@ -10,20 +10,20 @@ module.exports = (app_path) => {
 	
 	last_maps = {};
 	
-	function listMaps(filter = "mtimeMs", sorting = "desc") {
+	function listMaps(filter = "mtimeMs", sorting = "desc", custom_path = maps_path) {
 		return new Promise((resolve, reject) => {
-			glob(maps_path + "**/*", { dot: true }, async (err, files) => {
+			glob(custom_path + "**/*", { dot: true }, async (err, files) => {
 				if(!err) {
 					let maps = {};
 					for(file of files) {
 						if(path.extname(file) == "") {
-							const stat = await fs.promises.lstat(path.resolve(maps_path, file));
-							let name = file.toLowerCase().split(maps_path.toLowerCase()).join("");
+							const stat = await fs.promises.lstat(path.resolve(custom_path, file));
+							let name = file.toLowerCase().split(custom_path.toLowerCase()).join("");
 							if(stat.isFile()) maps[name] = { file, name, ...stat };
 						}
 						if(path.extname(file) == ".jpg" || path.extname(file) == ".png") {
 							let name = file.toLowerCase().split(".jpg").join("").split(".png").join("");
-							name = name.split(maps_path.toLowerCase()).join("");
+							name = name.split(custom_path.toLowerCase()).join("");
 							if(maps[name]) {
 								maps[name].image = file;
 							}
@@ -71,22 +71,23 @@ const DecompressZip = require('decompress-zip');
 let download_queue = [];
 let queue_running = false;
 
-function addToDownloadQueue(id, token) {
+function addToDownloadQueue(id, token, custom_path = maps_path) {
 	request(`https://api.mod.io/v1/games/629/mods/${id}`, {headers: {Authorization: "Bearer " + token}}, (err, res, body) => {
-	try {
-		body = JSON.parse(body);
-	} catch(err) {
-		console.log(err);
-	}
-	
-	if(!err && res.statusCode == 200) {
-		download_queue.push(body.modfile);
-		if(!queue_running) runQueue();
-	}
-	else {
-		reject(body);
-	}
-});
+		try {
+			body = JSON.parse(body);
+		} catch(err) {
+			console.log(err);
+		}
+		
+		if(!err && res.statusCode == 200) {
+			body.modfile.custom_path = custom_path;
+			download_queue.push(body.modfile);
+			if(!queue_running) runQueue();
+		}
+		else {
+			reject(body);
+		}
+	});
 }
 
 function runQueue() {
@@ -146,7 +147,7 @@ function decompress(file) {
 		io.emit("extracting-download", { percentage: ((fileIndex + 1) / fileCount) * 100, id });
 	});
 	
-	unzipper.extract({path: maps_path, restrict: false});
+	unzipper.extract({path: file.custom_path, restrict: false});
 }
 
 function deleteFile(path, cb) {
@@ -187,7 +188,7 @@ app.get('/modio/maps', (req, res) => {
 });
 
 app.get('/local/maps', (req, res) => {
-	listMaps(req.query.filter, req.query.sorting).then(maps => {
+	listMaps(req.query.filter, req.query.sorting, req.query.custom_path).then(maps => {
 		res.send(maps);
 	}).catch(err => {
 		res.status(500).send(err);
@@ -211,7 +212,7 @@ app.get('/internal/open', (req, res) => {
 
 app.post('/modio/download', (req, res) => {
 	if(req.body.id) {
-		addToDownloadQueue(req.body.id, req.body.token);
+		addToDownloadQueue(req.body.id, req.body.token, req.body.custom_path);
 		res.status(200).send();
 	}	
 	else {
@@ -262,6 +263,24 @@ function sendImg(req, res) {
 		res.status(404).send();
 	}
 }
+
+const { dialog } = require('electron');
+function askPath() {
+	return new Promise((resolve, reject) => {
+		dialog.showOpenDialog({properties: ['openDirectory']}).then(folder => {
+			if(!folder.canceled) {
+				resolve(folder.filePaths[0]);
+			}
+			else {
+				reject();
+			}
+		});
+	})
+}
+
+app.get('/internal/path', (req, res) => {
+	askPath().then(path => res.status(200).send({path: (path + '\\').split("\\").join("/")})).catch(() => {res.status(444).send({})});
+});
 
 console.log(path.resolve(app_path, './webapp'));
 app.use(express.static(path.resolve(app_path, './webapp')));
