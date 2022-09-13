@@ -1,4 +1,4 @@
-<img src="https://media.discordapp.net/attachments/1016748027039457341/1019038235206352947/unknown.png"/>
+<img src="https://media.discordapp.net/attachments/1016748027039457341/1019261290578989056/unknown.png"/>
 
 # MAPhub
 ## [Releases](https://github.com/roquef/skaterxl-map-hub/releases)
