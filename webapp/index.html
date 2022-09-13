@@ -342,7 +342,7 @@
         </div>
         <div class="left">
             <p class="options js-change-folder">change maps folder</p>
-            <p class="version">v1.0.1</p>
+            <p class="version">v1.0.2</p>
             <img class="close js-close" src="close.svg"/>
         </div>
     </div>
@@ -408,7 +408,7 @@
     change.addEventListener("click", () => {
         fetch("/internal/path").then(res => res.json()).then(path => {
             if(path.path) {
-                localStorage.setItem("custom-path", path.path);
+                localStorage.setItem("custom-path", encodeURIComponent(path.path));
                 window.location.reload();
             }
         });
