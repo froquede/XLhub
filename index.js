@@ -12,7 +12,6 @@ module.exports = (app_path) => {
 	
 	function listMaps(filter = "mtimeMs", sorting = "desc", custom_path = maps_path) {
 		return new Promise((resolve, reject) => {
-			console.log(custom_path + "**/*")
 			glob(custom_path + "**/*", { dot: true }, async (err, files) => {
 				if(!err) {
 					let maps = {};
