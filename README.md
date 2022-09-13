@@ -2,7 +2,7 @@
 
 # MAPhub
 ## [Releases](https://github.com/roquef/skaterxl-map-hub/releases)
-- Actual version: [v1.0.0](https://github.com/roquef/skaterxl-map-hub/releases/download/v1.0.0/MAPhub-1.0.0.zip)
+- Actual version: [v1.0.1](https://github.com/roquef/skaterxl-map-hub/releases/download/v1.0.1/MAPhub-1.0.1.zip)
 
 ## Dev
 
