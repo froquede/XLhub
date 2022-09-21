@@ -72,6 +72,7 @@ let download_queue = [];
 let queue_running = false;
 
 function addToDownloadQueue(id, token, custom_path = maps_path) {
+	console.log(custom_path);
 	request(`https://api.mod.io/v1/games/629/mods/${id}`, {headers: {Authorization: "Bearer " + token}, timeout: 20e3}, (err, res, body) => {
 		try {
 			body = JSON.parse(body);
@@ -224,7 +225,7 @@ app.get('/modio/maps', (req, res) => {
 });
 
 app.get('/local/maps', (req, res) => {
-	listMaps(req.query.filter, req.query.sorting, req.query.custom_path && req.query.custom_path.split(" ").join("") != "" ? decodeURI(req.query.custom_path) : undefined).then(maps => {
+	listMaps(req.query.filter, req.query.sorting, req.query.custom_path && req.query.custom_path.split(" ").join("") != "" ? decodeURIComponent(req.query.custom_path) : undefined).then(maps => {
 		res.send(maps);
 	}).catch(err => {
 		res.status(500).send(err);
@@ -248,7 +249,8 @@ app.get('/internal/open', (req, res) => {
 
 app.post('/modio/download', (req, res) => {
 	if(req.body.id) {
-		addToDownloadQueue(req.body.id, req.body.token, req.body.custom_path && req.body.custom_path.split(" ").join("") != "" ? decodeURI(req.body.custom_path) : undefined);
+		console.log(req.body.custom_path, decodeURIComponent(req.body.custom_path));
+		addToDownloadQueue(req.body.id, req.body.token, req.body.custom_path && req.body.custom_path.split(" ").join("") != "" ? decodeURIComponent(req.body.custom_path) : undefined);
 		res.status(200).send();
 	}	
 	else {

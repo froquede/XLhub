@@ -33,7 +33,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./webapp/MapHubIcon.ico"
+        "icon": "./webapp/XLhubIcon.ico"
       },
       "makers": [
         {

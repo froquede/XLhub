@@ -14,12 +14,17 @@ function createWindow () {
         frame:false,
         show: true,
         webPreferences: {},
-        icon: nativeImage.createFromPath(path.resolve(app_path, './webapp/MapHubIcon.ico'))
+        icon: nativeImage.createFromPath(path.resolve(app_path, './webapp/XLhubIcon.ico'))
     });
     mainWindow.webContents.setFrameRate(60);
     mainWindow.resizable = false;
     mainWindow.loadURL('http://localhost:420')
     mainWindow.setMenuBarVisibility(false);
+
+    if (process.platform === 'win32')
+    {
+        app.setAppUserModelId(app.name);
+    }
     
     // mainWindow.webContents.on('new-window', (e, url) => {
     //     e.preventDefault();
@@ -30,7 +35,7 @@ function createWindow () {
 let icon;
 app.whenReady().then(() => {
     createWindow();
-    icon = nativeImage.createFromPath(path.resolve(app_path, './webapp/MapHubIcon.ico'))
+    icon = nativeImage.createFromPath(path.resolve(app_path, './webapp/XLhubIcon.ico'))
     tray = new Tray(icon)
     
     const menu = Menu.buildFromTemplate([

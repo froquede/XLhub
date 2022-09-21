@@ -206,6 +206,7 @@ function getLocal(refresh = false) {
         }
 
         if(result.length == 0) document.querySelector(".local-container .no-data").classList.remove("hidden");
+        else document.querySelector(".local-container .no-data").classList.add("hidden");
 
         document.querySelector(".local-container").classList.remove("loading");
         render(result, document.querySelector(".local-container"));
