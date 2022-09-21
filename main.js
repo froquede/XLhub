@@ -1,6 +1,6 @@
-const { app, Tray, Menu, nativeImage, BrowserWindow } = require('electron')
+const { app, Tray, Menu, nativeImage, BrowserWindow, Notification } = require('electron')
 const app_path = app.getAppPath();
-const express_app = require("./index.js")(app_path);
+const express_app = require("./index.js")(app_path, Notification);
 
 let tray;
 
@@ -20,7 +20,7 @@ function createWindow () {
     mainWindow.resizable = false;
     mainWindow.loadURL('http://localhost:420')
     mainWindow.setMenuBarVisibility(false);
-
+    
     // mainWindow.webContents.on('new-window', (e, url) => {
     //     e.preventDefault();
     //     require('electron').shell.openExternal(url);
@@ -44,7 +44,7 @@ app.whenReady().then(() => {
         }
     ]);
     
-    tray.setToolTip('MAPHUB')
+    tray.setToolTip('XLhub')
     tray.setContextMenu(menu)
     
     tray.on('double-click', (e) => {

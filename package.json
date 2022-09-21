@@ -1,7 +1,7 @@
 {
-  "name": "MAPhub",
-  "productName": "MAPhub",
-  "description": "MAPhub",
+  "name": "XLhub",
+  "productName": "XLhub",
+  "description": "XLhub",
   "keywords": [],
   "main": "./main.js",
   "version": "1.0.2",
@@ -39,8 +39,8 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "MAPhub",
-            "version": "1.0.2"
+            "name": "XLhub",
+            "version": "1.1.0"
           }
         },
         {

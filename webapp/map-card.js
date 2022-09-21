@@ -23,6 +23,10 @@ export class mapCard extends LitElement {
     object-fit: cover;
   }
   
+  :host .image {
+    filter: brightness(1.1);
+  }
+
   :host p {
     font-family: 'Heebo', sans-serif;
   }

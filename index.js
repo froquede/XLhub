@@ -1,4 +1,4 @@
-module.exports = (app_path) => {
+module.exports = (app_path, notification) => {
 	const os = require("os");
 	const fs = require("fs");
 	const glob = require("glob");
@@ -50,7 +50,7 @@ module.exports = (app_path) => {
 		let sort = (sorting == "desc" ? "-" : "") + filter, offset = 20 * page, limit = 20;
 		return new Promise((resolve, reject) => {
 			//console.log(`https://api.mod.io/v1/games/629/mods?tags=Map&tags-not-in=${ignore}&_sort=${sort}&_offset=${offset}&_limit=${limit}&name-not-lk=*dropper*&name-lk=*${search}*`);
-			request(`https://api.mod.io/v1/games/629/mods?tags=Map&tags-not-in=${ignore}&_sort=${sort}&_offset=${offset}&_limit=${limit}&name-not-lk=*dropper*&name-lk=*${search}*`, {headers: {Authorization: "Bearer " + token}}, (err, res, body) => {
+			request(`https://api.mod.io/v1/games/629/mods?tags=Map&tags-not-in=${ignore}&_sort=${sort}&_offset=${offset}&_limit=${limit}&name-not-lk=*dropper*&name-lk=*${search}*`, {headers: {Authorization: "Bearer " + token}, timeout: 20e3}, (err, res, body) => {
 			try {
 				body = JSON.parse(body);
 			} catch(err) {
@@ -61,7 +61,7 @@ module.exports = (app_path) => {
 				resolve(body);
 			}
 			else {
-				reject(body);
+				reject({...body, response_status: res.statusCode});
 			}
 		});
 	});
@@ -72,7 +72,7 @@ let download_queue = [];
 let queue_running = false;
 
 function addToDownloadQueue(id, token, custom_path = maps_path) {
-	request(`https://api.mod.io/v1/games/629/mods/${id}`, {headers: {Authorization: "Bearer " + token}}, (err, res, body) => {
+	request(`https://api.mod.io/v1/games/629/mods/${id}`, {headers: {Authorization: "Bearer " + token}, timeout: 20e3}, (err, res, body) => {
 		try {
 			body = JSON.parse(body);
 		} catch(err) {
@@ -81,7 +81,7 @@ function addToDownloadQueue(id, token, custom_path = maps_path) {
 		
 		if(!err && res.statusCode == 200) {
 			body.modfile.custom_path = custom_path;
-			download_queue.push(body.modfile);
+			download_queue.push({body, ...body.modfile});
 			if(!queue_running) runQueue();
 		}
 		else {
@@ -94,13 +94,13 @@ function runQueue() {
 	if(download_queue[0]) {
 		queue_running = true;
 		let file = download_queue[0];
-		var w = fs.createWriteStream(file.filename);
+		let w = fs.createWriteStream(file.filename);
 		let total = 0;
 		let data = 0;
 		
 		let count = 0;
 		
-		request(file.download.binary_url).on( 'response', function ( data ) {
+		request(file.download.binary_url, {timeout: 20e3}).on( 'response', function ( data ) {
 			total = +data.headers['content-length'];
 		}).on('data', function (chunk) {
 			data += chunk.length;
@@ -130,17 +130,39 @@ function runQueue() {
 }
 
 function decompress(file) {
-	let path = file.filename;
+	let _path = file.filename;
 	let id = file.mod_id;
-	var unzipper = new DecompressZip(path)
+	var unzipper = new DecompressZip(_path)
 	
 	unzipper.on('error', function (err) {
 		console.log('Caught an error', err);
 	});
 	
 	unzipper.on('extract', function (log) {
-		io.emit("extracting-finished", { id });
-		deleteFile(path);
+		if(log.length == 1) downloadModioImage(file, log[0].deflated);
+		else {
+			let image, filename;
+			for(let item of log) {
+				if(item.deflated.toLowerCase().split(".png").length > 1 || item.deflated.toLowerCase().split(".jpg").length > 1) {
+					image = item.deflated;
+				}
+
+				if(path.extname(item.deflated) == "") filename = item.deflated;
+			}
+
+			let imagesplit = image.split(".");
+			if(imagesplit[imagesplit.length-2] !== filename) {
+				imagesplit[imagesplit.length-2] = filename;
+				imagesplit = imagesplit.join(".");
+				fs.rename(file.custom_path + image, file.custom_path + imagesplit, () => {
+					console.log("renamed", file.custom_path + image, file.custom_path + imagesplit);
+				});
+			}
+
+			io.emit("extracting-finished", { id });
+			new notification({title: "XLhub", body: filename + " finished downloading"}).show();
+		}
+		deleteFile(_path);
 	});
 	
 	unzipper.on('progress', function (fileIndex, fileCount) {
@@ -148,6 +170,20 @@ function decompress(file) {
 	});
 	
 	unzipper.extract({path: file.custom_path, restrict: false});
+}
+
+function downloadModioImage(file, name) {
+	let extension = file.body.logo.original.split(".")
+	extension = extension[extension.length - 1];
+	let filepath = (file.custom_path != "" ? file.custom_path : maps_path) + name + "." + extension;
+	filepath = filepath.split("\\").join("/");
+	let w = fs.createWriteStream(filepath);
+	request(file.body.logo.original, {timeout: 20e3}).on( 'response', function ( data ) {
+	}).on('data', function (chunk) {
+	}).on('end', function() {
+		io.emit("image-download", { id: file.mod_id });
+		io.emit("extracting-finished", { id: file.mod_id });
+	}).pipe(w);
 }
 
 function deleteFile(path, cb) {
@@ -188,7 +224,7 @@ app.get('/modio/maps', (req, res) => {
 });
 
 app.get('/local/maps', (req, res) => {
-	listMaps(req.query.filter, req.query.sorting, req.query.custom_path).then(maps => {
+	listMaps(req.query.filter, req.query.sorting, req.query.custom_path && req.query.custom_path.split(" ").join("") != "" ? decodeURI(req.query.custom_path) : undefined).then(maps => {
 		res.send(maps);
 	}).catch(err => {
 		res.status(500).send(err);
@@ -212,7 +248,7 @@ app.get('/internal/open', (req, res) => {
 
 app.post('/modio/download', (req, res) => {
 	if(req.body.id) {
-		addToDownloadQueue(req.body.id, req.body.token, req.body.custom_path);
+		addToDownloadQueue(req.body.id, req.body.token, req.body.custom_path && req.body.custom_path.split(" ").join("") != "" ? decodeURI(req.body.custom_path) : undefined);
 		res.status(200).send();
 	}	
 	else {

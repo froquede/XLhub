@@ -6,6 +6,7 @@ const socket = io();
 const token = localStorage.getItem("modio-token");
 if (!token) {
     document.querySelector(".modio-token").classList.remove("disabled");
+    document.body.classList.add("waiting");
 }
 
 document.querySelector(".js-send-modio").addEventListener("click", (evt) => {
@@ -46,7 +47,7 @@ function onFilter(event) {
     }
     else {
         if (modio_loading) return;
-
+        
         if (filter == modio_filter.filter) {
             toggleModioSorting(filter);
         }
@@ -164,20 +165,34 @@ function getModio(page = 0, refresh) {
     document.querySelector(".mod-io-container").classList.add("loading");
     modio_data.push(html`<loader-animation></loader-animation>`);
     render(modio_data, document.querySelector(".mod-io-container"));
-
+    
     window.fetch("/modio/maps?page=" + page + "&token=" + localStorage.getItem("modio-token") + "&filter=" + modio_filter.filter + "&sorting=" + modio_filter.sorting + "&search=" + modio_search, {signal: signalModio}).then(res => res.json()).then(data => {    
+        if(data.response_status && data.response_status == 401 && localStorage.getItem("modio-token")) {
+            localStorage.clear();
+            window.location.reload();
+        }
+
         for(let map of data.data) {
             modio_data.push(html`<map-card data='${JSON.stringify(map)}'></map-card>`);
+        }
+
+        if(data.data.length == 0) {
+            modio_data.push(html`<p class="no-data">No results found</p>`);
         }
         
         document.querySelector(".mod-io-container").classList.remove("loading");
         render(modio_data, document.querySelector(".mod-io-container"));
         
-        if(refresh) document.querySelector(".mod-io-container").scrollLeft = 0;
-
+        if(refresh) scrollStartModio();
+        
         setTimeout(() => {modio_loading = false;}, 0);
     });
 }
+
+function scrollStartModio() {
+    document.querySelector(".mod-io-container").scrollTo({left: 0, behavior: 'smooth'});
+}
+window.scrollStartModio = scrollStartModio;
 
 function getLocal(refresh = false) {
     document.querySelector(".local-container").classList.add("loading");
@@ -189,15 +204,22 @@ function getLocal(refresh = false) {
             map.name = key;
             result.push(html`<map-card type="local" name="${map.name}" data='${JSON.stringify(map)}'></map-card>`);
         }
-        
+
+        if(result.length == 0) document.querySelector(".local-container .no-data").classList.remove("hidden");
+
         document.querySelector(".local-container").classList.remove("loading");
         render(result, document.querySelector(".local-container"));
         
-        if(refresh) document.querySelector(".local-container").scrollLeft = 0;
-
+        if(refresh) scrollStartLocal();
+        
         if(document.querySelector(".js-search-local").value.split(" ").join("").length > 0) searchLocal();
     });
 }
+
+function scrollStartLocal() {
+    document.querySelector(".local-container").scrollTo({left: 0, behavior: 'smooth'});
+}
+window.scrollStartLocal = scrollStartLocal;
 
 function addScrollListener(element) {
     element.addEventListener('wheel', (event) => {
@@ -222,9 +244,10 @@ function LoadMore(element) {
 
 function getMe() {
     window.fetch("https://api.mod.io/v1/me", { headers: { Authorization: "Bearer " + localStorage.getItem("modio-token") }}). then(res => res.json()).then(data => {
-        document.querySelector(".js-username").innerHTML = data.username;
-        document.querySelector(".js-avatar").setAttribute("src", data.avatar.thumb_100x100);
-    });
+    document.querySelector(".js-username").innerHTML = data.username;
+    document.querySelector(".js-avatar").setAttribute("src", data.avatar.thumb_100x100);
+    document.querySelector(".avatar.hidden").classList.remove("hidden");
+});
 }
 
 let modio_search = "";
@@ -237,6 +260,7 @@ function searchModio() {
 function searchLocal() {
     let value = document.querySelector(".js-search-local").value;
     let cards = document.querySelectorAll(".local-container map-card");
+    let found = 0;
 
     for(let i = 0; i < cards.length; i++) {
         let name = cards[i].getAttribute("name");
@@ -245,7 +269,17 @@ function searchLocal() {
         var re = new RegExp(stringfilter, 'g');
         var res = actual.match(re);
         if (res == null) cards[i].classList.add("hidden");
-        else cards[i].classList.remove("hidden");
+        else {
+            cards[i].classList.remove("hidden");
+            found++;
+        }
+    }
+
+    if(found == 0) {       
+        document.querySelector(".local-container .no-data").classList.remove("hidden");
+    }
+    else {
+        document.querySelector(".local-container .no-data").classList.add("hidden");
     }
 }
 
@@ -259,9 +293,8 @@ document.querySelector(".js-search-local").addEventListener("keydown", (evt) => 
 
 document.querySelector(".js-search-local-img").addEventListener("click", searchLocal);
 
-searchLocal
-
 getModio(actual_page);
+window.getModio = getModio
 getLocal();
 window.getLocal = getLocal;
 getMe();

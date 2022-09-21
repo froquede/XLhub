@@ -39,6 +39,7 @@
             box-sizing: border-box;
             transition: .2s ease all;
             cursor: grab;
+            margin-top: 4px;
         }
         
         .card-container::-webkit-scrollbar {
@@ -52,6 +53,11 @@
             margin-top: 6px;
             margin-bottom: 4px;
             padding-left: 64px;
+        }
+
+        h2:hover {
+            cursor: pointer;
+            text-decoration: underline;
         }
         
         .header {
@@ -209,6 +215,25 @@
             display: flex;
             align-items: center;
             justify-content: flex-start;
+            position: relative;
+        }
+
+        .sub-header .refresh {
+            position: absolute;
+            cursor: pointer;
+            right: 18px;
+            opacity: .25;
+            transition: .2s ease all;
+            transform: scale(1);
+        }
+
+        .sub-header .refresh:hover {
+            opacity: 1;
+            transition: .2s ease all;
+        }
+
+        .sub-header .refresh:focus {
+            transform: scale(.9);
         }
 
         .filter {
@@ -254,7 +279,7 @@
             color: #FEE3AE;
         }
 
-        .right, .right .avatar, .left {
+        .right, .avatar, .left {
             display: flex;
             align-items: center;
         }
@@ -272,8 +297,12 @@
         }
 
         .avatar {
-            margin-left: 14px;
+            margin-right: 20px;
             opacity: .6;
+        }
+
+        .avatar.hidden {
+            display: none;
         }
 
         .avatar p {
@@ -319,12 +348,88 @@
             opacity: .4;
             -webkit-app-region: no-drag;
             transition: .2s ease all;
+            margin-right: 10px !important;
         }
 
         .options:hover {
             opacity: 1;
             cursor: pointer;
             transition: .2s ease all;
+        }
+
+        .title-header {
+            height: 35px;
+            display: flex;
+        }
+
+        .center {
+            color: #fafafa;
+            display: flex;
+            font-family: 'Heebo', sans-serif;
+            align-items: center;
+            margin-left: 16px;
+        }
+
+        .center .disabled {
+            cursor: not-allowed;
+        }
+
+        .center h3 {
+            opacity: .5;
+            margin: 0;
+            margin-right: 12px;
+            font-size: 14px;
+            transition: .2s ease all;
+            -webkit-app-region: no-drag;
+            cursor: pointer;
+            height: 27px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center h3.active {
+            opacity: 1;
+            font-size: 18px;
+            transition: .2s ease all;
+        }
+
+        .fixed-version {
+            position: fixed;
+            right: 14px;
+            bottom: 12px;
+            color: #fafafa;
+        }
+
+        .fixed-version p {
+            margin: 0;
+            font-family: 'Raleway', sans-serif;
+            font-size: 14px;
+            opacity: .8;
+        }
+
+        .no-data {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Raleway', sans-serif;
+            color: #fafafa;
+            width: 320px;
+            height: 188px;
+            margin-right: 24px;
+        }
+
+        .no-data.hidden {
+            display: none;
+        }
+
+        body.waiting .header .right .center {
+            display: none;
+        }
+
+        body.waiting .header .left .options {
+            display: none;
         }
     </style>
     <script src="/latinize.js"></script>
@@ -334,15 +439,21 @@
 <body>
     <div class="header">
         <div class="right">
-            <img src="logo.svg"/>
-            <div class="avatar">
-                <img class="js-avatar"/>
-                <p class="js-username"></p>
+            <img src="logo.png"/>
+            <div class="center">
+                <h3 class="active">Maps</h3>
+                <h3 class="disabled" title="Coming soon">Clothing</h3>
+                <h3 class="disabled" title="Coming soon">Mods</h3>
+                <h3 class="disabled" title="Coming soon">Stats</h3>
+                <h3 class="disabled" title="Coming soon">Sounds</h3>
             </div>
         </div>
         <div class="left">
-            <p class="options js-change-folder">change maps folder</p>
-            <p class="version">v1.0.2</p>
+            <p class="options js-change-folder">maps folder</p>
+            <div class="avatar hidden">
+                <p class="js-username"></p>
+                <img class="js-avatar"/>
+            </div>
             <img class="close js-close" src="close.svg"/>
         </div>
     </div>
@@ -350,7 +461,7 @@
     <div class="modio-token disabled">
         <div class="content">
             <img src="./modio_logo.svg"/>
-            <p style="width: 444px;">For using MAPhub you need to have a mod.io account, enter your account email to receive a security code:</p>
+            <p style="width: 444px;">For using XLhub you need to have a mod.io account, enter your account email to receive a security code:</p>
             <p class="js-code-message code-message disabled"></p>
             <div class="input-container">
                 <input class="js-email" type="email" placeholder="johndoe@xl.com"/>
@@ -360,12 +471,13 @@
                 <input class="js-code step2" placeholder="XYZAB" maxlength="5"/>
                 <button class="js-send-code step2">Confirm</button>
             </div>
-            <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. MAPhub doesn't modify or use your information for anything other than getting the mod.io maps - do not share your security code or token with no one else.</p>
+            <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. XLhub doesn't modify or use your information for anything other than getting the mod.io maps - do not share your security code or token with no one else.</p>
         </div>
     </div>
 
     <div class="sub-header">
-        <h2>Mod.io maps</h2>
+        <img class="refresh js-refresh-modio" src="refresh_icon.svg"/>
+        <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io maps</h2>
         <div class="filter">
             <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
             <div class="js-filter card" data-filter="name" type="modio">Name</div>
@@ -381,7 +493,8 @@
     <div class="card-container mod-io-container loading dragscroll"></div>
     
     <div class="sub-header">
-        <h2>Local maps</h2>
+        <img class="refresh js-refresh-local" src="refresh_icon.svg"/>
+        <h2 class="js-scrollstart-local" title="Scroll to the start">Local maps</h2>
         <div class="filter">
             <div class="js-filter card active __desc" data-filter="mtimeMs" type="local">Date</div>
             <div class="js-filter card" data-filter="size" type="local">Size</div>
@@ -394,6 +507,11 @@
     </div>
     <div class="card-container local-container loading dragscroll">
         <loader-animation></loader-animation>
+        <p class="no-data hidden">No results found</p>
+    </div>
+
+    <div class="fixed-version">
+        <p class="version">v1.1.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>
@@ -413,5 +531,15 @@
             }
         });
     });
+
+    let refresh_modio = document.querySelector(".js-refresh-modio");
+    refresh_modio.addEventListener("click", () => {window.getModio(0, true);});
+
+    let refresh_local = document.querySelector(".js-refresh-local");
+    refresh_local.addEventListener("click", () => {window.getLocal(true);});
+
+    document.querySelector(".js-scrollstart-modio").addEventListener("click", () => { window.scrollStartModio() });
+    document.querySelector(".js-scrollstart-local").addEventListener("click", () => { window.scrollStartLocal() });
+    
 </script>
 </html>
