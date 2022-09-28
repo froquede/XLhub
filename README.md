@@ -1,8 +1,8 @@
 <img src="https://media.discordapp.net/attachments/1016748027039457341/1019261290578989056/unknown.png"/>
 
 # XLhub
-## [Releases](https://github.com/roquef/skaterxl-map-hub/releases)
-- Actual version: [v1.0.1](https://github.com/roquef/skaterxl-map-hub/releases/download/v1.0.1/MAPhub-1.0.1.zip)
+## [Releases](https://github.com/roquef/XLhub/releases)
+- Actual version: [v1.1.0](https://github.com/roquef/XLhub/releases/download/v1.1.0/XLhub-1.1.0.zip)
 
 ## Dev
 
