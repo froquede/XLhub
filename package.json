@@ -4,12 +4,13 @@
   "description": "XLhub",
   "keywords": [],
   "main": "./main.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "froquede",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "make:linux": "electron-forge make --platform linux",
     "electron": "electron ."
   },
   "dependencies": {
@@ -40,18 +41,21 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "XLhub",
-            "version": "1.1.0"
+            "version": "1.2.0"
           }
         },
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin"
+            "darwin", "linux"
           ]
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "name": "XLhub",
+            "version": "1.2.0"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",

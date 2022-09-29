@@ -20,6 +20,10 @@ export class LoaderAnimation extends LitElement {
         justify-content: center;
         min-height: 100%;
     }
+
+    :host svg {
+      max-height: 100%;
+    }
   `
 
   constructor() {

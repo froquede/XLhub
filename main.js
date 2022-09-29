@@ -26,10 +26,10 @@ function createWindow () {
         app.setAppUserModelId(app.name);
     }
     
-    // mainWindow.webContents.on('new-window', (e, url) => {
-    //     e.preventDefault();
-    //     require('electron').shell.openExternal(url);
-    // });
+    mainWindow.webContents.on('new-window', (e, url) => {
+        e.preventDefault();
+        require('electron').shell.openExternal(url);
+    });
 }
 
 let icon;

@@ -1,4 +1,5 @@
 import { html, render } from 'https://cdn.skypack.dev/lit-html';
+import 'https://unpkg.com/@github/time-elements@3.1.4/dist/index.js?module';
 import './loader-animation.js';
 import './map-card.js';
 
@@ -284,6 +285,27 @@ function searchLocal() {
     }
 }
 
+window.user_ratings = {};
+function getRatings() {
+    fetch("/modio/ratings?token=" + localStorage.getItem("modio-token")).then(response => response.json()).then(data => {
+        if(!data.error) { window.user_ratings = data; }
+    });
+}
+
+getRatings();
+
+window.user_subscriptions = {};
+function getSubscriptions() {
+    fetch("/modio/subscriptions?token=" + localStorage.getItem("modio-token")).then(response => response.json()).then(data => {
+        if(!data.error) { window.user_subscriptions = data; }
+        getModio(actual_page);
+        getLocal();
+        getMe();
+    });
+}
+
+getSubscriptions();
+
 document.querySelector(".js-search-modio").addEventListener("keydown", (evt) => {
     if(evt.key === "Enter") searchModio();
 });
@@ -294,11 +316,8 @@ document.querySelector(".js-search-local").addEventListener("keydown", (evt) => 
 
 document.querySelector(".js-search-local-img").addEventListener("click", searchLocal);
 
-getModio(actual_page);
 window.getModio = getModio
-getLocal();
 window.getLocal = getLocal;
-getMe();
 
 addScrollListener(document.querySelector(".mod-io-container"));
 addScrollListener(document.querySelector(".local-container"));

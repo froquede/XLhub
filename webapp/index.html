@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map Manager</title>
+    <title>XLhub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Raleway:wght@300;600&display=swap" rel="stylesheet">
@@ -41,11 +41,32 @@
             cursor: grab;
             margin-top: 4px;
         }
-        
+
         .card-container::-webkit-scrollbar {
-            display: none;
+            height: 8px;
+            background-color: transparent;
         }
-        
+
+        .card-container::-webkit-scrollbar-track:horizontal {
+            margin-left: 64px;
+            margin-right: 64px;
+        }
+
+        .card-container::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            transition: .2s ease all;
+            background-clip: padding-box
+        }
+
+        .card-container:hover::-webkit-scrollbar-thumb {
+            background: #576574;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            transition: .2s ease all;
+        }
+
         h2 {
             font-family: 'Heebo', sans-serif;
             color: #fff;
@@ -511,7 +532,7 @@
     </div>
 
     <div class="fixed-version">
-        <p class="version">v1.1.0</p>
+        <p class="version">v1.2.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>

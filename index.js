@@ -1,3 +1,4 @@
+const request = require("request");
 module.exports = (app_path, notification) => {
 	const os = require("os");
 	const fs = require("fs");
@@ -32,9 +33,9 @@ module.exports = (app_path, notification) => {
 					
 					last_maps = maps;
 					let result = Object.entries(maps).sort((a, b) => {
-							if(b[1][filter] < a[1][filter]) return sorting == "desc" ? -1 : 1
-							if(b[1][filter] > a[1][filter]) return sorting == "desc" ? 1 : -1
-							return 0;
+						if(b[1][filter] < a[1][filter]) return sorting == "desc" ? -1 : 1
+						if(b[1][filter] > a[1][filter]) return sorting == "desc" ? 1 : -1
+						return 0;
 					});
 					resolve(Object.fromEntries(result));
 				}
@@ -43,7 +44,6 @@ module.exports = (app_path, notification) => {
 		})
 	}
 	
-	const request = require("request");
 	const ignore = ["console_selected_xbox", "console_selected_ps4", "console_selected_switch", "console_recheck_xbox", "console_recheck_ps4", "console_recheck_switch"].join(",");
 	function listModioMaps(page = 0, token, filter = "date_updated", sorting = "desc", search = "") {
 		if(filter == "downloads" || filter == "rating") sorting = sorting == "desc" ? "asc" : "desc";
@@ -67,6 +67,92 @@ module.exports = (app_path, notification) => {
 	});
 }
 
+function getUserLikes(token) {
+	return new Promise((resolve, reject) => {
+		request('https://api.mod.io/v1/me/ratings', { headers: { Authorization: "Bearer " + token }, timeout: 20e3 }, (err, res, body) => {
+			try {
+				body = JSON.parse(body);
+			} catch(err) {
+				console.log(err);
+			}
+
+			if(!err && res.statusCode == 200) {
+				let result = {};
+				for(let i = 0; i < body.data.length; i++) {
+					if(body.data[i].game_id == "629") {
+						result[body.data[i].mod_id] = body.data[i].rating;
+					}
+				}
+				resolve(result);
+			}
+			else {
+				reject({...body, response_status: res.statusCode});
+			}
+		});
+	});
+}
+
+function getUserSubscriptions(token) {
+	return new Promise((resolve, reject) => {
+		request('https://api.mod.io/v1/me/subscribed', { headers: { Authorization: "Bearer " + token }, timeout: 20e3 }, (err, res, body) => {
+			try {
+				body = JSON.parse(body);
+			} catch(err) {
+				console.log(err);
+			}
+
+			if(!err && res.statusCode == 200) {
+				let result = {};
+				for(let i = 0; i < body.data.length; i++) {
+					if(body.data[i].game_id == "629") {
+						result[body.data[i].id] = true;
+					}
+				}
+				resolve(result);
+			}
+			else {
+				reject({...body, response_status: res.statusCode});
+			}
+		});
+	});
+}
+
+function rateModio(id, rating, token) {
+	return new Promise((resolve, reject) => {
+		request(`https://api.mod.io/v1/games/629/mods/${id}/ratings`, {
+		method: "POST", headers: { Authorization: "Bearer " + token }, form: {rating}, timeout: 20e3
+	}, (err, res, body) => {		
+		if(!err && (res.statusCode == 201 || res.statusCode == 400)) {
+			resolve(body);
+		}
+		else {
+			reject({response_status: res.statusCode});
+		}
+	});});	
+}
+
+function subscribeModio(id, token, del = false) {
+	return new Promise((resolve, reject) => {
+		request(`https://api.mod.io/v1/games/629/mods/${id}/subscribe`, { 
+		method: del ? "DELETE" : "POST", headers: {Authorization: "Bearer " + token, "Content-Type": "application/x-www-form-urlencoded"}, timeout: 20e3
+	}, (err, res, body) => {
+		if(!del) {
+			try {
+				body = JSON.parse(body);
+			} catch(err) {
+				console.log(err);
+			}
+		}
+		
+		if(!err && (res.statusCode == 201 || res.statusCode == 204 || res.statusCode == 400)) {
+			resolve(body);
+		}
+		else {
+			reject({...body, response_status: res.statusCode});
+		}});
+	});	
+}
+
 const DecompressZip = require('decompress-zip');
 let download_queue = [];
 let queue_running = false;
@@ -74,21 +160,21 @@ let queue_running = false;
 function addToDownloadQueue(id, token, custom_path = maps_path) {
 	console.log(custom_path);
 	request(`https://api.mod.io/v1/games/629/mods/${id}`, {headers: {Authorization: "Bearer " + token}, timeout: 20e3}, (err, res, body) => {
-		try {
-			body = JSON.parse(body);
-		} catch(err) {
-			console.log(err);
-		}
-		
-		if(!err && res.statusCode == 200) {
-			body.modfile.custom_path = custom_path;
-			download_queue.push({body, ...body.modfile});
-			if(!queue_running) runQueue();
-		}
-		else {
-			reject(body);
-		}
-	});
+	try {
+		body = JSON.parse(body);
+	} catch(err) {
+		console.log(err);
+	}
+	
+	if(!err && res.statusCode == 200) {
+		body.modfile.custom_path = custom_path;
+		download_queue.push({body, ...body.modfile});
+		if(!queue_running) runQueue();
+	}
+	else {
+		reject(body);
+	}
+});
 }
 
 function runQueue() {
@@ -144,13 +230,15 @@ function decompress(file) {
 		else {
 			let image, filename;
 			for(let item of log) {
-				if(item.deflated.toLowerCase().split(".png").length > 1 || item.deflated.toLowerCase().split(".jpg").length > 1) {
-					image = item.deflated;
+				if(item.deflated) {
+					if(item.deflated.toLowerCase().split(".png").length > 1 || item.deflated.toLowerCase().split(".jpg").length > 1) {
+						image = item.deflated;
+					}
+					
+					if(path.extname(item.deflated) == "") filename = item.deflated;
 				}
-
-				if(path.extname(item.deflated) == "") filename = item.deflated;
 			}
-
+			
 			let imagesplit = image.split(".");
 			if(imagesplit[imagesplit.length-2] !== filename) {
 				imagesplit[imagesplit.length-2] = filename;
@@ -159,7 +247,7 @@ function decompress(file) {
 					console.log("renamed", file.custom_path + image, file.custom_path + imagesplit);
 				});
 			}
-
+			
 			io.emit("extracting-finished", { id });
 			new notification({title: "XLhub", body: filename + " finished downloading"}).show();
 		}
@@ -184,6 +272,8 @@ function downloadModioImage(file, name) {
 	}).on('end', function() {
 		io.emit("image-download", { id: file.mod_id });
 		io.emit("extracting-finished", { id: file.mod_id });
+		
+		new notification({title: "XLhub", body: name + " finished downloading"}).show();
 	}).pipe(w);
 }
 
@@ -258,6 +348,31 @@ app.post('/modio/download', (req, res) => {
 	}
 });
 
+app.post("/modio/rating/positive", (req, res) => {
+	if(!req.body.id) res.status(400).send();
+	else rateModio(req.body.id, 1, req.body.token).then(data => {res.send(data)}).catch(err => {res.status(500).send(err)});
+});
+
+app.post("/modio/rating/negative", (req, res) => {
+	if(!req.body.id) res.status(400).send();
+	else rateModio(req.body.id, -1, req.body.token).then(data => {res.send(data)}).catch(err => {res.status(500).send(err)});
+});
+
+app.post("/modio/rating/remove", (req, res) => {
+	if(!req.body.id) res.status(400).send();
+	else rateModio(req.body.id, 0, req.body.token).then(data => {res.send(data)}).catch(err => {res.status(500).send(err)});
+});
+
+app.post("/modio/subscribe", (req, res) => {
+	if(!req.body.id) res.status(400).send();
+	else subscribeModio(req.body.id, req.body.token).then(data => {res.send(data)}).catch(err => {res.status(500).send(err)});
+});
+
+app.delete("/modio/subscribe", (req, res) => {
+	if(!req.body.id) res.status(400).send();
+	else subscribeModio(req.body.id, req.body.token, true).then(data => {res.send(data)}).catch(err => {res.status(500).send(err)});
+});
+
 var mime = {
 	html: 'text/html',
 	txt: 'text/plain',
@@ -282,8 +397,17 @@ app.get('/local/image', (req, res) => {
 	}
 });
 
+app.get('/modio/ratings', (req, res) => {
+	getUserLikes(req.query.token).then(result => {res.send(result);}).catch(err => {res.status(500).send(err)});
+});	
+
+app.get('/modio/subscriptions', (req, res) => {
+	getUserSubscriptions(req.query.token).then(result => {res.send(result);}).catch(err => {res.status(500).send(err)});
+});	
+
+
 function sendImg(req, res) {
-	let img = last_maps[req.query.id].image;
+	let img = last_maps[decodeURIComponent(req.query.id)].image;
 	if(img) {
 		var type = mime[path.extname(img).slice(1)] || 'text/plain';
 		
