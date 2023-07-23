@@ -574,10 +574,16 @@
         });
     });
 
-    fetch("/internal/config").then(res => res.json()).then(config => {
-        localStorage.setItem("configs", config);
-        document.querySelector('.js-xl-version').innerHTML = config.gameVersion || '';
-    });
+    function fetchConfig() {
+        fetch("/internal/config").then(res => res.json()).then(config => {
+            localStorage.setItem("configs", config);
+            document.querySelector('.js-xl-version').innerHTML = config.gameVersion || '';
+
+            if(!config.gameVersion) setTimeout(fetchConfig, 5e3);
+        });
+    }
+
+    fetchConfig();
 
     let refresh_modio = document.querySelector(".js-refresh-modio");
     refresh_modio.addEventListener("click", () => {window.getModio(0, true);});

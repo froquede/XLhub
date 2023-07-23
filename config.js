@@ -5,6 +5,7 @@ global.config = {};
 fs.stat(p, (err, stats) => {
     if(!err) {
         global.config = require('./config.json');
+        delete global.config.gameVersion;
     }
 })
 
