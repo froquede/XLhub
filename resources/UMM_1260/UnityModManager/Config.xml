@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Config xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="Skater XL Beta">
+  <Folder>Skater XL</Folder>
+  <ModsDirectory>Mods</ModsDirectory>
+  <ModInfo>Info.json</ModInfo>
+  <EntryPoint>[Assembly-CSharp.dll]TitleScreen.OnEnter:After</EntryPoint>
+  <StartingPoint>[Assembly-CSharp.dll]TitleScreen.OnEnter:After</StartingPoint>
+  <MinimalManagerVersion>0.12.5</MinimalManagerVersion>
+</Config>

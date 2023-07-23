@@ -126,7 +126,7 @@
             height: 188px;
         }
 
-        .modio-token {
+        .modio-token, .umm-install {
             width: 100vw;
             height: 100vh;
             position: fixed;
@@ -140,12 +140,12 @@
             color: #fafafa;
         }
 
-        .modio-token.disabled {
+        .modio-token.disabled, .umm-install.disabled {
             z-index: -1;
             background: rgba(0, 0, 0, 0);
         }
 
-        .modio-token .content {
+        .modio-token .content, .umm-install .content {
             width: 60vw;
             display: flex;
             align-items: center;
@@ -157,7 +157,7 @@
             box-sizing: border-box;
         }
 
-        .modio-token .info {
+        .modio-token .info, .umm-install .info {
             color: #b2bec3;
             font-size: 13px;
             font-weight: 300;
@@ -463,14 +463,14 @@
             <img src="logo.png"/>
             <div class="center">
                 <h3 class="active">Maps</h3>
-                <h3 class="disabled" title="Coming soon">Clothing</h3>
-                <h3 class="disabled" title="Coming soon">Mods</h3>
-                <h3 class="disabled" title="Coming soon">Stats</h3>
-                <h3 class="disabled" title="Coming soon">Sounds</h3>
+                <h3 class="disabled" title="Maybe coming one day">Gear</h3>
+                <h3 class="disabled" title="Maybe coming one day">Mods</h3>
+                <h3 class="disabled" title="Maybe coming one day">Stats</h3>
+                <h3 class="disabled" title="Maybe coming one day">Sounds</h3>
             </div>
         </div>
         <div class="left">
-            <p class="options js-change-folder">maps folder</p>
+            <p class="options js-change-folder">set maps folder</p>
             <div class="avatar hidden">
                 <p class="js-username"></p>
                 <img class="js-avatar"/>
@@ -493,6 +493,27 @@
                 <button class="js-send-code step2">Confirm</button>
             </div>
             <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. XLhub doesn't modify or use your information for anything other than getting the mod.io maps - do not share your security code or token with no one else.</p>
+        </div>
+    </div>
+
+    <div class="umm-install js-install-step1 disabled">
+        <div class="content loading">
+            <p style="width: 444px;">Installing UMM</p>
+            <loader-animation class="js-umm-loader"></loader-animation>
+        </div>
+    </div>
+
+    <div class="umm-install js-install-step2 disabled">
+        <div class="content">
+            <p style="width: 444px;">UMM installed successfully</p>
+            <button class="js-close-modal">Close</button>
+        </div>
+    </div>
+
+    <div class="umm-install js-install-step3 disabled">
+        <div class="content">
+            <p style="width: 444px;">An error happenend while installing UMM</p>
+            <button class="js-close-modal">Close</button>
         </div>
     </div>
 
@@ -532,7 +553,7 @@
     </div>
 
     <div class="fixed-version">
-        <p class="version">v1.2.1</p>
+        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.3.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>
@@ -553,6 +574,11 @@
         });
     });
 
+    fetch("/internal/config").then(res => res.json()).then(config => {
+        localStorage.setItem("configs", config);
+        document.querySelector('.js-xl-version').innerHTML = config.gameVersion || '';
+    });
+
     let refresh_modio = document.querySelector(".js-refresh-modio");
     refresh_modio.addEventListener("click", () => {window.getModio(0, true);});
 
@@ -561,6 +587,28 @@
 
     document.querySelector(".js-scrollstart-modio").addEventListener("click", () => { window.scrollStartModio() });
     document.querySelector(".js-scrollstart-local").addEventListener("click", () => { window.scrollStartLocal() });
-    
+
+    function UMMInstall() {
+        document.querySelector('.js-install-step1').classList.remove('disabled');
+    }
+
+    function UMMInstallFinish() {
+        setTimeout(() => {
+            document.querySelector('.js-install-step1').classList.add('disabled');
+            document.querySelector('.js-install-step2').classList.remove('disabled');
+        }, 1e3);
+    }
+
+    document.querySelector(".js-close-modal").addEventListener("click", () => {
+         document.querySelector('.js-install-step2').classList.add('disabled');
+         document.querySelector('.js-install-step3').classList.add('disabled');
+    });
+
+    function UMMInstallError() {
+        setTimeout(() => {
+            document.querySelector('.js-install-step1').classList.add('disabled');
+            document.querySelector('.js-install-step3').classList.remove('disabled');
+        }, 1e3);
+    }
 </script>
 </html>

@@ -1,4 +1,5 @@
 const request = require("request");
+
 module.exports = (app_path, notification) => {
 	const os = require("os");
 	const fs = require("fs");
@@ -49,7 +50,6 @@ module.exports = (app_path, notification) => {
 		if(filter == "downloads" || filter == "rating") sorting = sorting == "desc" ? "asc" : "desc";
 		let sort = (sorting == "desc" ? "-" : "") + filter, offset = 20 * page, limit = 20;
 		return new Promise((resolve, reject) => {
-			//console.log(`https://api.mod.io/v1/games/629/mods?tags=Map&tags-not-in=${ignore}&_sort=${sort}&_offset=${offset}&_limit=${limit}&name-not-lk=*dropper*&name-lk=*${search}*`);
 			request(`https://api.mod.io/v1/games/629/mods?tags=Map&tags-not-in=${ignore}&_sort=${sort}&_offset=${offset}&_limit=${limit}&name-not-lk=*dropper*&name-lk=*${search}*`, {headers: {Authorization: "Bearer " + token}, timeout: 20e3}, (err, res, body) => {
 			try {
 				body = JSON.parse(body);
@@ -70,51 +70,51 @@ module.exports = (app_path, notification) => {
 function getUserLikes(token) {
 	return new Promise((resolve, reject) => {
 		request('https://api.mod.io/v1/me/ratings', { headers: { Authorization: "Bearer " + token }, timeout: 20e3 }, (err, res, body) => {
-			try {
-				body = JSON.parse(body);
-			} catch(err) {
-				console.log(err);
-			}
-
-			if(!err && res.statusCode == 200) {
-				let result = {};
-				for(let i = 0; i < body.data.length; i++) {
-					if(body.data[i].game_id == "629") {
-						result[body.data[i].mod_id] = body.data[i].rating;
-					}
+		try {
+			body = JSON.parse(body);
+		} catch(err) {
+			console.log(err);
+		}
+		
+		if(!err && res.statusCode == 200) {
+			let result = {};
+			for(let i = 0; i < body.data.length; i++) {
+				if(body.data[i].game_id == "629") {
+					result[body.data[i].mod_id] = body.data[i].rating;
 				}
-				resolve(result);
 			}
-			else {
-				reject({...body, response_status: res.statusCode});
-			}
-		});
+			resolve(result);
+		}
+		else {
+			reject({...body, response_status: res.statusCode});
+		}
 	});
+});
 }
 
 function getUserSubscriptions(token) {
 	return new Promise((resolve, reject) => {
 		request('https://api.mod.io/v1/me/subscribed', { headers: { Authorization: "Bearer " + token }, timeout: 20e3 }, (err, res, body) => {
-			try {
-				body = JSON.parse(body);
-			} catch(err) {
-				console.log(err);
-			}
-
-			if(!err && res.statusCode == 200) {
-				let result = {};
-				for(let i = 0; i < body.data.length; i++) {
-					if(body.data[i].game_id == "629") {
-						result[body.data[i].id] = true;
-					}
+		try {
+			body = JSON.parse(body);
+		} catch(err) {
+			console.log(err);
+		}
+		
+		if(!err && res.statusCode == 200) {
+			let result = {};
+			for(let i = 0; i < body.data.length; i++) {
+				if(body.data[i].game_id == "629") {
+					result[body.data[i].id] = true;
 				}
-				resolve(result);
 			}
-			else {
-				reject({...body, response_status: res.statusCode});
-			}
-		});
+			resolve(result);
+		}
+		else {
+			reject({...body, response_status: res.statusCode});
+		}
 	});
+});
 }
 
 function rateModio(id, rating, token) {
@@ -336,6 +336,9 @@ app.get('/internal/open', (req, res) => {
 	});
 });
 
+app.get('/internal/config', (req, res) => {
+	res.status(200).send(global.config);
+});
 
 app.post('/modio/download', (req, res) => {
 	if(req.body.id) {
@@ -458,7 +461,7 @@ io.on('connection', function(socket) {
 
 
 http.listen(port, () => {
-	console.log(`Map manager server listening on port ${port}`)
+	console.log(`XLhub server listening on port ${port}`)
 })
 
 return app;
