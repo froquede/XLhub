@@ -22,7 +22,7 @@ require('node-netstat')({
         require("request")("http://localhost:420/internal/maximize");
         setTimeout(() => {
             process.exit();
-        }, 1e3);
+        }, 200);
     }
 });
 
@@ -30,29 +30,34 @@ require("./config.js");
 
 const steamPath = require("steam-path");
 let searching = false;
-function findGameSteam() {
+function findGameSteam(menu) {
 	if (global.config.gamePath) {
-		getGameVersion();
+		getGameVersion(menu);
 	}
 
 	searching = true;
 	steamPath.getAppPath(962730).then(result => {
 		global.set('gamePath', result.path);
 		
-		getGameVersion();
+		getGameVersion(menu);
 		searching = false;
 	}).catch(err => {
 		console.log(err, "Game not found via steam");
 		searching = false;
+        menu.getMenuItemById('actions').enabled = false;
+        menu.getMenuItemById('folders').enabled = false;
 	});
 }
 
-function getGameVersion() {
+function getGameVersion(menu) {
 	require('child_process').exec(`wmic datafile where name='${global.config.gamePath.split('\\').join('\\\\')}\\\\SkaterXL.exe' get Version`, (err, stdout) => {
 		if(!err) {
-			if(stdout.split('2019.4.40').length > 1) return global.set('gameVersion', '1.2.6.0');
+            console.log(stdout);
+            menu.getMenuItemById('umm').enabled = true;
+			if(stdout.split('2019.4.40.50731').length > 1) return global.set('gameVersion', '1.2.7.8');
 			if(stdout.split('2019.3.15').length > 1) return global.set('gameVersion', '1.2.2.8');
 			global.set('gameVersion', 'unknown');
+            menu.getMenuItemById('umm').enabled = false;
 		}
 		else console.log(err);
 	})
@@ -79,8 +84,6 @@ function getMods(menu) {
         }
     });
 }
- 
-findGameSteam();
 
 function init() {
     const app_path = app.getAppPath();
@@ -96,14 +99,14 @@ function init() {
     function createWindow () {
         mainWindow = new BrowserWindow({
             width: 900,
-            height: 600,
-            frame:false,
+            height: 642,
+            frame: false,
             show: true,
             webPreferences: {},
             icon: nativeImage.createFromPath(path.resolve(app_path, './webapp/XLhubIcon.ico'))
         });
         mainWindow.webContents.setFrameRate(60);
-        mainWindow.resizable = false;
+        //mainWindow.resizable = false;
         mainWindow.loadURL('http://localhost:420')
         mainWindow.setMenuBarVisibility(false);
         
@@ -130,9 +133,11 @@ function init() {
                 click() { show(); }
             },
             { 
+                id: 'actions',
                 label: 'Actions',
                 submenu: [
                     {
+                        id: 'umm',
                         label: 'Install UnityModManager',
                         click() { 
                             show();
@@ -143,11 +148,13 @@ function init() {
                                 console.log(err);
                                 mainWindow.webContents.executeJavaScript('UMMInstallError()');
                             });
-                        }
+                        },
+                        enabled: false
                     }
                 ]
             },
             { 
+                id: 'folders',
                 label: 'Folders',
                 submenu: [
                     {
@@ -200,6 +207,7 @@ function init() {
         tray.setToolTip('XLhub')
         tray.setContextMenu(menu)
 
+        findGameSteam(menu);
         getMods(menu);
         
         tray.on('double-click', (e) => {

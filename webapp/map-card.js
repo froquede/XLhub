@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'https://cdn.skypack.dev/lit';
+import { LitElement, css, html } from 'https://cdn.skypack.dev/lit@v3.1.1';
 
 export class mapCard extends LitElement {
   static properties = {
@@ -10,7 +10,7 @@ export class mapCard extends LitElement {
   :host {
     width: 320px;
     height: 188px;
-    margin-right: 24px;
+    margin-right: 18px;
   }
 
   :host(.hidden) {
@@ -51,9 +51,8 @@ export class mapCard extends LitElement {
   
   :host .container {
     position: relative;
-    border-radius: 42px;
     position: relative;
-    border-radius: 24px;
+    border-radius: 18px;
     overflow: hidden;
     width: 320px;
     height: 180px;
@@ -106,7 +105,7 @@ export class mapCard extends LitElement {
     position: absolute;
     width: 320px;
     height: 180px;
-    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,.5) 50%, rgba(0,0,0,1) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,.35) 50%, rgba(0,0,0,.7) 100%);
     bottom: 0;
     z-index: 1;
   }
@@ -523,7 +522,7 @@ export class mapCard extends LitElement {
       </div>
       
       <div title="Open ${this.data.name} page on mod.io" class="button webpage">
-        <a href="https://skaterxl.old.mod.io/${this.data.name_id}" target="_blank">
+        <a href="https://mod.io/g/skaterxl/m/${this.data.name_id}" target="_blank">
         <img src="webpage_icon.svg"/>
         </a>
       </div>

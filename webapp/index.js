@@ -1,4 +1,4 @@
-import { html, render } from 'https://cdn.skypack.dev/lit-html';
+import { html, render } from 'https://cdn.skypack.dev/lit-html@v3.1.1';
 import 'https://unpkg.com/@github/time-elements@3.1.4/dist/index.js?module';
 import './loader-animation.js';
 import './map-card.js';
@@ -158,14 +158,18 @@ let modio_data = []
 const controllerModio = new AbortController();
 const { signalModio } = controllerModio;
 let modio_loading = false;
+let first_load = true;
 
 function getModio(page = 0, refresh) {
     modio_loading = true;
     controllerModio.abort();
-    if(refresh) modio_data = [];
+    if (refresh) modio_data = [];
     document.querySelector(".mod-io-container").classList.add("loading");
-    modio_data.push(html`<loader-animation></loader-animation>`);
-    render(modio_data, document.querySelector(".mod-io-container"));
+    if (!first_load && !refresh) {
+        modio_data.push(html`<loader-animation></loader-animation>`);
+        render(modio_data, document.querySelector(".mod-io-container"));
+    }
+    else first_load = false;
     
     window.fetch("/modio/maps?page=" + page + "&token=" + localStorage.getItem("modio-token") + "&filter=" + modio_filter.filter + "&sorting=" + modio_filter.sorting + "&search=" + modio_search, {signal: signalModio}).then(res => res.json()).then(data => {    
         if(data.response_status && data.response_status == 401 && localStorage.getItem("modio-token")) {
@@ -174,7 +178,7 @@ function getModio(page = 0, refresh) {
         }
 
         for(let map of data.data) {
-            modio_data.push(html`<map-card data='${JSON.stringify(map)}'></map-card>`);
+            modio_data.push(html`<map-card .data='${map}'></map-card>`);
         }
 
         if(data.data.length == 0) {
@@ -237,7 +241,7 @@ let actual_page = 0;
 function LoadMore(element) {
     element.addEventListener('scroll', (e) => {
         let max_size = (320 * modio_data.length) - 64;
-        if(element.scrollLeft >= max_size - 640 && !modio_loading) {
+        if(element.scrollLeft + window.innerWidth >= max_size && !modio_loading) {
             actual_page++;
             getModio(actual_page);
         }

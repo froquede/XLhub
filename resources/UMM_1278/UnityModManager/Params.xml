@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Param xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Hotkey>
+    <keyCode>None</keyCode>
+    <modifiers>0</modifiers>
+  </Hotkey>
+  <CheckUpdates>1</CheckUpdates>
+  <ShowOnStart>0</ShowOnStart>
+  <WindowWidth>960</WindowWidth>
+  <WindowHeight>720</WindowHeight>
+  <UIScale>0.938829839</UIScale>
+  <UIFont>Arial</UIFont>
+  <ModParams>
+    <Mod Id="XXLMod3" Enabled="true" />
+    <Mod Id="better-replay" Enabled="true" />
+    <Mod Id="BetterObjectDropperV2" Enabled="true" />
+    <Mod Id="BillORumble" Enabled="true" />
+    <Mod Id="BonedOllieMod" Enabled="true" />
+    <Mod Id="BreakFX" Enabled="true" />
+    <Mod Id="DeckFX" Enabled="true" />
+    <Mod Id="DeckFXMenuFix" Enabled="true" />
+    <Mod Id="fro-mod" Enabled="true" />
+    <Mod Id="grabs-customizer" Enabled="true" />
+    <Mod Id="multimod" Enabled="true" />
+    <Mod Id="multiplayer-admin" Enabled="true" />
+    <Mod Id="MultiplayerPlusPlusMod" Enabled="true" />
+    <Mod Id="SoundMod" Enabled="true" />
+    <Mod Id="TransitionModifier" Enabled="true" />
+    <Mod Id="XLGearModifier" Enabled="true" />
+    <Mod Id="walking-mod" Enabled="true" />
+    <Mod Id="XLGraphics" Enabled="true" />
+    <Mod Id="XLMenuMod" Enabled="true" />
+    <Mod Id="XLWeather" Enabled="true" />
+  </ModParams>
+</Param>

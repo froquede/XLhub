@@ -34,12 +34,18 @@
             max-width: 100vw;
             width: 100vw;
             overflow-x: auto;
+            overflow-y: hidden;
             padding-left: 64px;
             padding-right: 64px;
             box-sizing: border-box;
             transition: .2s ease all;
             cursor: grab;
             margin-top: 4px;
+            margin-bottom: 24px;
+        }
+
+        .card-container:last-of-type {
+            margin-bottom: 0;
         }
 
         .card-container::-webkit-scrollbar {
@@ -69,7 +75,7 @@
 
         h2 {
             font-family: 'Heebo', sans-serif;
-            color: #fff;
+            color: #fafafa;
             margin: 0;
             margin-top: 6px;
             margin-bottom: 4px;
@@ -240,12 +246,12 @@
         }
 
         .sub-header .refresh {
-            position: absolute;
+            position: relative;
             cursor: pointer;
-            right: 18px;
             opacity: .25;
             transition: .2s ease all;
             transform: scale(1);
+            margin-left: 16px;
         }
 
         .sub-header .refresh:hover {
@@ -452,6 +458,13 @@
         body.waiting .header .left .options {
             display: none;
         }
+
+        .maps-content {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 128px);
+            justify-content: center;
+        }
     </style>
     <script src="/latinize.js"></script>
     <script src="/listeners.js"></script>
@@ -460,13 +473,13 @@
 <body>
     <div class="header">
         <div class="right">
-            <img src="logo.png"/>
+            <img src="logo_mini.png"/>
             <div class="center">
                 <h3 class="active">Maps</h3>
-                <h3 class="disabled" title="Maybe coming one day">Gear</h3>
-                <h3 class="disabled" title="Maybe coming one day">Mods</h3>
-                <h3 class="disabled" title="Maybe coming one day">Stats</h3>
-                <h3 class="disabled" title="Maybe coming one day">Sounds</h3>
+                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Gear</h3>
+                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Mods</h3>
+                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Stats</h3>
+                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Sounds</h3>
             </div>
         </div>
         <div class="left">
@@ -492,7 +505,7 @@
                 <input class="js-code step2" placeholder="XYZAB" maxlength="5"/>
                 <button class="js-send-code step2">Confirm</button>
             </div>
-            <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. XLhub doesn't modify or use your information for anything other than getting the mod.io maps - do not share your security code or token with no one else.</p>
+            <p class="info">The signin process is done using the official mod.io API login, no data will be stored other than the token generated for this access. XLhub doesn't modify or use your information for anything other than getting the mod.io maps - <b>do not share your security code or token with no one else</b>.</p>
         </div>
     </div>
 
@@ -517,43 +530,47 @@
         </div>
     </div>
 
-    <div class="sub-header">
-        <img class="refresh js-refresh-modio" src="refresh_icon.svg"/>
-        <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io maps</h2>
-        <div class="filter">
-            <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
-            <div class="js-filter card" data-filter="name" type="modio">Name</div>
-            <div class="js-filter card" data-filter="popular" type="modio">Popular</div>
-            <div class="js-filter card" data-filter="downloads" type="modio">Downloads</div>
-            <div class="js-filter card" data-filter="rating" type="modio">Rating</div>
-            <div class="search_bar">
-                <input placeholder="Search" class="js-search-modio"/>
-                <img src="./search.svg"/>
+    <div class="maps-content">
+        <div class="sub-header">
+            <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io maps</h2>
+            <div class="filter">
+                <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
+                <div class="js-filter card" data-filter="name" type="modio">Name</div>
+                <div class="js-filter card" data-filter="popular" type="modio">Popular</div>
+                <div class="js-filter card" data-filter="downloads" type="modio">Downloads</div>
+                <div class="js-filter card" data-filter="rating" type="modio">Rating</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-modio"/>
+                    <img src="./search.svg"/>
+                </div>
             </div>
+            <img title="Refresh mod.io maps" class="refresh js-refresh-modio" src="refresh_icon.svg"/>
         </div>
-    </div>
-    <div class="card-container mod-io-container loading dragscroll"></div>
-    
-    <div class="sub-header">
-        <img class="refresh js-refresh-local" src="refresh_icon.svg"/>
-        <h2 class="js-scrollstart-local" title="Scroll to the start">Local maps</h2>
-        <div class="filter">
-            <div class="js-filter card active __desc" data-filter="mtimeMs" type="local">Date</div>
-            <div class="js-filter card" data-filter="size" type="local">Size</div>
-            <div class="js-filter card" data-filter="name" type="local">Name</div>
-            <div class="search_bar">
-                <input placeholder="Search" class="js-search-local"/>
-                <img class="js-search-local-img" src="./search.svg"/>
+        <div class="card-container mod-io-container loading dragscroll">
+            <loader-animation></loader-animation>
+        </div>
+        
+        <div class="sub-header">
+            <h2 class="js-scrollstart-local" title="Scroll to the start">Local maps</h2>
+            <div class="filter">
+                <div class="js-filter card active __desc" data-filter="mtimeMs" type="local">Date</div>
+                <div class="js-filter card" data-filter="size" type="local">Size</div>
+                <div class="js-filter card" data-filter="name" type="local">Name</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-local"/>
+                    <img class="js-search-local-img" src="./search.svg"/>
+                </div>
             </div>
+            <img title="Refresh local maps" class="refresh js-refresh-local" src="refresh_icon.svg"/>
         </div>
-    </div>
-    <div class="card-container local-container loading dragscroll">
-        <loader-animation></loader-animation>
-        <p class="no-data hidden">No results found</p>
+        <div class="card-container local-container loading dragscroll">
+            <loader-animation></loader-animation>
+            <p class="no-data hidden">No results found</p>
+        </div>
     </div>
 
     <div class="fixed-version">
-        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.3.0</p>
+        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.4.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>
@@ -577,10 +594,17 @@
     function fetchConfig() {
         fetch("/internal/config").then(res => res.json()).then(config => {
             localStorage.setItem("configs", config);
-            document.querySelector('.js-xl-version').innerHTML = config.gameVersion || '';
+            document.querySelector('.js-xl-version').innerHTML = ("" + config.gameVersion) != "undefined" ? (config.gameVersion + " " + getBranchName(config.gameVersion)) : '';
+
 
             if(!config.gameVersion) setTimeout(fetchConfig, 5e3);
         });
+    }
+
+    function getBranchName(version) {
+        if (version === "1.2.2.8") return "(alpha)";
+        if (version === "1.2.6.0") return "(beta)";
+        if (version === "1.2.7.8") return "(public)";
     }
 
     fetchConfig();

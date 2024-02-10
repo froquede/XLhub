@@ -1,4 +1,4 @@
-import { LitElement, css, html, svg } from 'https://cdn.skypack.dev/lit';
+import { LitElement, css, html, svg } from 'https://cdn.skypack.dev/lit@v3.1.1';
 let loader = svg`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; display: block;" width="111px" height="111px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
 <circle cx="50" cy="50" r="23" stroke="#0F0F11" stroke-width="11" fill="none"></circle>
 <circle cx="50" cy="50" r="23" stroke="#fafafa" stroke-width="6" stroke-linecap="round" fill="none">
