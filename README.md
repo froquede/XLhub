@@ -2,7 +2,7 @@
 
 # XLhub
 ## Releases
-- Actual version: [v1.3.0](https://api.mod.io/v1/games/629/mods/2368596/files/4080243/download)
+- Actual version: [v1.4.0](https://github.com/roquef/XLhub/releases/download/v1.4.0/XLhub-1.4.0.zip)
 
 ## Dev
 
