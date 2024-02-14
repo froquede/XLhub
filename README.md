@@ -1,4 +1,4 @@
-<img src="https://media.discordapp.net/attachments/1016748027039457341/1019261290578989056/unknown.png"/>
+<img src="https://github.com/roquef/XLhub/blob/main/v140.png?raw=true"/>
 
 # XLhub
 ## Releases
