@@ -14,6 +14,11 @@ global.set = function(key, value) {
     save();
 }
 
+global.delete = function(key) {
+    delete global.config[key];
+    save();
+}
+
 function save() {
     fs.writeFile(p, JSON.stringify(global.config, null, 4), err => {if(err) console.log(err);})
 }

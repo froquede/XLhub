@@ -132,13 +132,13 @@
             height: 188px;
         }
 
-        .modio-token, .umm-install {
+        .modio-token, .umm-install, .modal {
             width: 100vw;
             height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            background: rgba(0,0,0,.9);
+            background: rgba(0,0,0,.95);
             z-index: 100;
             display: flex;
             align-items: center;
@@ -146,12 +146,12 @@
             color: #fafafa;
         }
 
-        .modio-token.disabled, .umm-install.disabled {
+        .modio-token.disabled, .umm-install.disabled, .modal.disabled {
             z-index: -1;
             background: rgba(0, 0, 0, 0);
         }
 
-        .modio-token .content, .umm-install .content {
+        .modio-token .content, .umm-install .content, .modal .content {
             width: 60vw;
             display: flex;
             align-items: center;
@@ -161,6 +161,99 @@
             text-align: center;
             padding-top: 24px;
             box-sizing: border-box;
+        }
+
+        .mod-download.loading .content {
+            display: none;
+        }
+
+        .mod-download loader-animation {
+            display: none;
+            width: 120px;
+            min-height: 120px;
+        }
+
+        .mod-download.loading loader-animation {
+            display: flex;
+        }
+
+        .mod-download {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mod-download .content {
+            background: rgba(250, 250, 250, .04);
+            border-radius: 12px;
+            padding: 0;
+            border: 2px solid rgba(250, 250, 250, .1);
+            overflow: hidden;
+            margin-top: 48px;
+            margin-bottom: 24px;
+        }
+
+        .mod-download .version-list {
+            min-width: 100%;
+            max-height: 60vh;
+            overflow-y: scroll;
+        }
+
+        .mod-download .content .item {
+            display: flex;
+            min-width: 100%;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(250, 250, 250, .05);
+            transition: .2s ease all;
+        }
+
+        .mod-download .version-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mod-download .content .item:first-of-type {
+            background: rgba(0, 0, 0, .75);
+            opacity: .8;
+        }
+
+        .mod-download .content .item p {
+            text-decoration: underline;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s ease all;
+        }
+
+        .mod-download .content .item p.small {
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .mod-download .content .item p:last-of-type {
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .mod-download .content .item:first-of-type p {
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .mod-download .content .item.disabled p {
+            opacity: .1;
+            transition: .2s ease all;
+        }
+        
+        .mod-download .content .item:not(:first-of-type):hover {
+            background: rgba(250, 250, 250, .04);
+            cursor: pointer;
+            transition: .2s ease all;
+        }
+
+        .mod-download .content .item.disabled:hover p {
+            opacity: .8;
+            transition: .2s ease all;
         }
 
         .modio-token .info, .umm-install .info {
@@ -230,6 +323,10 @@
             display: none;
         }
 
+        h3.disabled {
+            opacity: .1 !important;
+        }
+
         .code-message.disabled {
             display: none;
         }
@@ -294,13 +391,13 @@
             font-weight: 600;
         }
 
-        .__desc::after {
+        .active.__desc::after {
             content: "˅";
             padding-left: 4px;
             color: #FEE3AE;
         }
 
-        .__asc::after {
+        .active.__asc::after {
             content: "˄";
             padding-left: 4px;
             color: #FEE3AE;
@@ -378,6 +475,11 @@
             margin-right: 10px !important;
         }
 
+        .set {
+            opacity: .4;
+            margin-right: 10px !important;
+        }
+
         .options:hover {
             opacity: 1;
             cursor: pointer;
@@ -421,6 +523,11 @@
             transition: .2s ease all;
         }
 
+        .center h3:hover {
+            opacity: 1;
+            transition: .2s ease all;
+        }
+
         .fixed-version {
             position: fixed;
             right: 14px;
@@ -459,11 +566,19 @@
             display: none;
         }
 
-        .maps-content {
-            display: flex;
+        .tab {
+            display: none;
             flex-direction: column;
             height: calc(100vh - 128px);
             justify-content: center;
+        }
+
+        .maps-content {
+
+        }
+
+        .tab.active {
+            display: flex;
         }
     </style>
     <script src="/latinize.js"></script>
@@ -475,15 +590,17 @@
         <div class="right">
             <img src="logo_mini.png"/>
             <div class="center">
-                <h3 class="active">Maps</h3>
+                <h3 class="active js-change-tab" data-tab="maps">Maps</h3>
+                <h3 class="js-change-tab" data-tab="mods">Mods</h3>
                 <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Gear</h3>
-                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Mods</h3>
                 <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Stats</h3>
                 <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Sounds</h3>
             </div>
         </div>
         <div class="left">
-            <p class="options js-change-folder">set maps folder</p>
+            <p class="set">set</p>
+            <p class="options js-change-game">game folder</p>
+            <p class="options js-change-folder">maps folder</p>
             <div class="avatar hidden">
                 <p class="js-username"></p>
                 <img class="js-avatar"/>
@@ -530,7 +647,20 @@
         </div>
     </div>
 
-    <div class="maps-content">
+    <div class="mod-download js-modal modal disabled">
+        <loader-animation></loader-animation>
+        <div class="content">
+            <div class="version-list">
+                <div class="item">
+                    <p>Mod version</p>
+                    <p>SkaterXL version</p>
+                </div>
+            </div>
+        </div>
+        <button class="js-close-modal">Close</button>
+    </div>
+
+    <div class="maps-content tab active" data-tab="maps">
         <div class="sub-header">
             <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io maps</h2>
             <div class="filter">
@@ -569,8 +699,47 @@
         </div>
     </div>
 
+    <div class="mods-content tab" data-tab="mods">
+        <div class="sub-header">
+            <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io mods</h2>
+            <div class="filter">
+                <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
+                <div class="js-filter card" data-filter="name" type="modio">Name</div>
+                <div class="js-filter card" data-filter="popular" type="modio">Popular</div>
+                <div class="js-filter card" data-filter="downloads" type="modio">Downloads</div>
+                <div class="js-filter card" data-filter="rating" type="modio">Rating</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-modio"/>
+                    <img src="./search.svg"/>
+                </div>
+            </div>
+            <img title="Refresh mod.io maps" class="refresh js-refresh-modio" src="refresh_icon.svg"/>
+        </div>
+        <div class="card-container mod-io-container loading dragscroll">
+            <loader-animation></loader-animation>
+        </div>
+        
+        <div class="sub-header">
+            <h2 class="js-scrollstart-local" title="Scroll to the start">Local mods</h2>
+            <div class="filter">
+                <!-- <div class="js-filter card active __desc" data-filter="birthtimeMs" type="local">Date</div> -->
+                <!-- <div class="js-filter card" data-filter="size" type="local">Size</div> -->
+                <div class="js-filter card active __asc" data-filter="name" type="local">Name</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-local"/>
+                    <img class="js-search-local-img" src="./search.svg"/>
+                </div>
+            </div>
+            <img title="Refresh local maps" class="refresh js-refresh-local" src="refresh_icon.svg"/>
+        </div>
+        <div class="card-container local-container loading dragscroll">
+            <loader-animation></loader-animation>
+            <p class="no-data hidden">No results found</p>
+        </div>
+    </div>
+
     <div class="fixed-version">
-        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.4.0</p>
+        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.5.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>
@@ -591,13 +760,21 @@
         });
     });
 
+    document.querySelector(".js-change-game").addEventListener("click", () => {
+        fetch("/internal/gamePath").then(res => res.json()).then(path => {
+            if (path.path) {
+                localStorage.setItem("game-path", encodeURIComponent(path.path));
+                window.location.reload();
+            }
+        });
+    });
+
     function fetchConfig() {
         fetch("/internal/config").then(res => res.json()).then(config => {
+            window.config = config;
             localStorage.setItem("configs", config);
-            document.querySelector('.js-xl-version').innerHTML = ("" + config.gameVersion) != "undefined" ? (config.gameVersion + " " + getBranchName(config.gameVersion)) : '';
-
-
-            if(!config.gameVersion) setTimeout(fetchConfig, 5e3);
+            document.querySelector('.js-xl-version').innerHTML = ("" + config.gameVersion) != "undefined" ? (config.gameVersion + " " + getBranchName(config.gameVersion)) : ' unknown';
+            if(!config.gameVersion) setTimeout(fetchConfig, 1e3);
         });
     }
 
@@ -605,18 +782,19 @@
         if (version === "1.2.2.8") return "(alpha)";
         if (version === "1.2.6.0") return "(beta)";
         if (version === "1.2.7.8") return "(public)";
+        return "";
     }
 
     fetchConfig();
 
-    let refresh_modio = document.querySelector(".js-refresh-modio");
-    refresh_modio.addEventListener("click", () => {window.getModio(0, true);});
+    let refresh_modio = document.querySelectorAll(".js-refresh-modio");
+    refresh_modio.forEach(el => el.addEventListener("click", () => {window.getModio(0, true);}));
 
-    let refresh_local = document.querySelector(".js-refresh-local");
-    refresh_local.addEventListener("click", () => {window.getLocal(true);});
+    let refresh_local = document.querySelectorAll(".js-refresh-local");
+    refresh_local.forEach(el => el.addEventListener("click", () => {window.getLocal(true);}));
 
-    document.querySelector(".js-scrollstart-modio").addEventListener("click", () => { window.scrollStartModio() });
-    document.querySelector(".js-scrollstart-local").addEventListener("click", () => { window.scrollStartLocal() });
+    document.querySelectorAll(".js-scrollstart-modio").forEach(el => el.addEventListener("click", () => { window.scrollStartModio() }));
+    document.querySelectorAll(".js-scrollstart-local").forEach(el => el.addEventListener("click", () => { window.scrollStartLocal() }));
 
     function UMMInstall() {
         document.querySelector('.js-install-step1').classList.remove('disabled');
@@ -629,16 +807,124 @@
         }, 1e3);
     }
 
-    document.querySelector(".js-close-modal").addEventListener("click", () => {
+    document.querySelectorAll(".js-close-modal").forEach(el => el.addEventListener("click", () => {
          document.querySelector('.js-install-step2').classList.add('disabled');
          document.querySelector('.js-install-step3').classList.add('disabled');
-    });
+         document.querySelector('.js-modal').classList.add('disabled');
+    }));
 
     function UMMInstallError() {
         setTimeout(() => {
             document.querySelector('.js-install-step1').classList.add('disabled');
             document.querySelector('.js-install-step3').classList.remove('disabled');
         }, 1e3);
+    }
+
+    document.querySelectorAll(".js-change-tab").forEach(tab => tab.addEventListener("click", (e) => {
+        document.querySelector('.js-change-tab.active').classList.remove('active');
+        document.querySelector('.tab.active').classList.remove('active');
+        let tab = e.currentTarget.dataset.tab;
+        document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
+        window.actualTab = tab;
+
+        window.modio_filter = { filter: tab == "mods" ? "popular" : "date_updated", sorting: "desc" };
+        window.local_filter = { filter: tab == "mods" ? "name" : "mtimeMs", sorting: tab == "mods" ? "asc" : "desc" };
+
+        e.currentTarget.classList.add('active');
+
+        window.getModio(0, true);
+        window.getLocal(0, true);
+
+        setTimeout(() => {
+            window.selectModioSorting(window.modio_filter.filter, window.modio_filter.sorting);
+            window.selectLocalSorting(window.local_filter.filter, window.local_filter.sorting);
+        }, 0);
+    }));
+
+    window.openFileListModalLoading = () => {
+        document.querySelector(".mod-download").classList.remove('disabled');
+        document.querySelector(".mod-download").classList.add('loading');
+    }
+
+    window.openFileListModal = (files) => {
+        document.querySelector(".mod-download").classList.remove('loading');
+        let rhtml = `
+        <div class="item">
+            <p>Mod version</p>
+            <p>Filename</p>
+            <p>SkaterXL version</p>
+        </div>
+        `;
+
+        let temp = {};
+        
+        for (let i = files.data.length - 1; i >= 0; i--) {
+            let mod = files.data[i];
+            let version = ('' + mod.version).toLowerCase().split('v').join('');
+            console.log(mod);
+            if(version != 'null') {
+                let xlversion = getXLVersion(mod.mod_id, version, mod.filename);
+                let disabled = xlversion.split(window.config.gameVersion).length <= 1;
+    
+                temp[version] = [];
+    
+                rhtml += `
+                <div class="item js-download-mod ${!disabled ? '' : 'disabled'}" data-mod-id="${mod.mod_id}" data-mod="${mod.id}" data-disabled="${disabled}">
+                    <p>v${version}</p>
+                    <p class="small">${mod.filename}</p>
+                    <p>${xlversion != '' ? 'v' + xlversion : 'unknown'}</p>
+                </div>
+                `
+            }
+        }
+
+        console.log(JSON.stringify(temp, null, 4));
+
+        document.querySelector(".mod-download .version-list").innerHTML = rhtml;
+        document.querySelectorAll(".js-download-mod").forEach(item => item.addEventListener("click", e => {
+            let download = false;
+            if (e.currentTarget.dataset.disabled == 'true')  download = confirm("XLhub can't verify the compability of this mod with your game version, are you sure you want to conitnue?");
+            else download = true;
+
+            if (download) {
+                downloadMod(e.currentTarget.dataset);
+                document.querySelector(".js-modal").classList.add('disabled');
+            }
+        }));
+    }
+
+    function getXLVersion(mod_id, version, file) {
+        let result = [];
+        let fileVersion = (version + "-" + file).toLowerCase().split('.zip').join('');
+
+        for (let i = 0; i < window.config.mods.length; i++) {
+            let mod = window.config.mods[i];
+            if (mod.id == mod_id) {
+                for (let mod_version in mod.versions) {
+                    if (mod_version == version || mod_version == fileVersion) {
+                        result = mod.versions[mod_version];
+                    }
+                }
+            }
+        }
+
+        return result.join(' | ');
+    }
+
+    function downloadMod(data) {
+        fetch(`/modio/download?type=script`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: data.modId, file: data.mod, token: localStorage.getItem("modio-token") })
+        }).then(res => {
+            if (res.status == 200) {
+                console.log('map-card[data-id="' + data.modId + '"]');
+                document.querySelector('map-card[data-id="' + data.modId + '"]').setDownloading();
+            }
+        });
     }
 </script>
 </html>

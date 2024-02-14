@@ -1,6 +1,7 @@
 let found = false;
 if (require('electron-squirrel-startup')) return;
 
+require("./config.js");
 require("./logger.js");
 const { app, Tray, Menu, nativeImage, BrowserWindow, Notification } = require('electron')
 const fs = require('fs');
@@ -26,13 +27,12 @@ require('node-netstat')({
     }
 });
 
-require("./config.js");
-
 const steamPath = require("steam-path");
 let searching = false;
 function findGameSteam(menu) {
 	if (global.config.gamePath) {
-		getGameVersion(menu);
+        console.log(global.config.gamePath);
+		return getGameVersion(menu);
 	}
 
 	searching = true;
@@ -44,23 +44,38 @@ function findGameSteam(menu) {
 	}).catch(err => {
 		console.log(err, "Game not found via steam");
 		searching = false;
+        getGameVersion(menu);
+                
         menu.getMenuItemById('actions').enabled = false;
         menu.getMenuItemById('folders').enabled = false;
 	});
 }
 
+let last_menu;
 function getGameVersion(menu) {
-	require('child_process').exec(`wmic datafile where name='${global.config.gamePath.split('\\').join('\\\\')}\\\\SkaterXL.exe' get Version`, (err, stdout) => {
+    let command = `wmic datafile where name='${global.config.gamePath.split('\\').join('\\\\')}\\\\SkaterXL.exe' get Version`;
+    command = command.split('\\\\\\\\').join('\\\\');
+
+    if(!menu) menu = last_menu;
+
+	require('child_process').exec(command, (err, stdout) => {
 		if(!err) {
-            console.log(stdout);
+            console.log(stdout, stdout.split(" ").join("").length);
+
             menu.getMenuItemById('umm').enabled = true;
 			if(stdout.split('2019.4.40.50731').length > 1) return global.set('gameVersion', '1.2.7.8');
-			if(stdout.split('2019.3.15').length > 1) return global.set('gameVersion', '1.2.2.8');
+			if(stdout.split('2019.3.15.65342').length > 1) return global.set('gameVersion', '1.2.2.8');
+
 			global.set('gameVersion', 'unknown');
             menu.getMenuItemById('umm').enabled = false;
 		}
-		else console.log(err);
+		else {
+            console.log(err);
+            setTimeout(() => { getGameVersion(menu); }, 5e3);
+        }
 	})
+
+    last_menu = menu;
 }
 
 function getMods(menu) {
@@ -82,6 +97,14 @@ function getMods(menu) {
                 if(!keys['xlgm']) menu.getMenuItemById('xlgm').enabled = false;
             });
         }
+        else {
+            if (err.code == "ENOENT") {
+                fs.mkdir(global.config.gamePath + '\\Mods', err => {
+                    getMods(menu);
+                });
+            }
+            else console.log(err);
+        }
     });
 }
 
@@ -95,6 +118,8 @@ function init() {
     
     const path = require('path')
     let mainWindow;
+
+    global.getGameInfo = getGameInfo;
     
     function createWindow () {
         mainWindow = new BrowserWindow({
@@ -207,13 +232,17 @@ function init() {
         tray.setToolTip('XLhub')
         tray.setContextMenu(menu)
 
-        findGameSteam(menu);
-        getMods(menu);
+        getGameInfo(menu);
         
         tray.on('double-click', (e) => {
             show();
         })
     });
+
+    function getGameInfo(menu) {
+        findGameSteam(menu);
+        getMods(menu);
+    }
     
     function show() {
         mainWindow.show();

@@ -311,6 +311,8 @@ export class mapCard extends LitElement {
     this.percentage = 0;
     this.downloading = false; 
     this.extracting = false;
+
+	this.setDownloading = this.setDownloading.bind(this);
   }
   
   firstUpdated() {
@@ -350,17 +352,36 @@ export class mapCard extends LitElement {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id, token: localStorage.getItem("modio-token"), custom_path: localStorage.getItem("custom-path")})
+      body: JSON.stringify({id, token: localStorage.getItem("modio-token") })
     }).then(res => {
       console.dir(res);
       if(res.status == 200) {
-        this.downloading = true;
-        this.requestUpdate();
+        this.setDownloading();
       }
       else {
-        alert(res.status);
+        alert("Error trying to download the mod: " + res.status);
       }
     })
+  }
+
+  setDownloading() {
+	this.downloading = true;
+    this.requestUpdate();
+  }
+
+  getFiles(id) {
+	fetch(`/modio/files?id=${id}&token=${localStorage.getItem("modio-token")}`, {
+		method: "GET",
+		headers: {
+		  'Accept': 'application/json',
+		  'Content-Type': 'application/json'
+		}
+	}).then(res => {
+		window.openFileListModalLoading();
+		res.json().then(data => {
+			window.openFileListModal(data);
+		});
+    });
   }
   
   deleteFile(file) {
@@ -494,85 +515,100 @@ export class mapCard extends LitElement {
       });
     }
   }
+
+  getFileSize(size) {
+    let csize = (size / 1024 / 1024);
+	if(csize < 1) {
+		csize *= 1024;
+		return csize.toFixed(0) + 'kb';
+	}
+	else {
+		if(csize >= 1024) {
+			csize /= 1024;
+			return csize.toFixed(2) + 'gb';
+		}
+		else return csize.toFixed(0) + 'mb';
+	}
+  }
   
   render() {
     if(this.data) {
       return html`
       <div class="container">
-      <p class="title">${this.data.name}</p>
-      ${
-        (this.type == "local" && this.data.image) || this.type != "local" ? 
-        html`<img class="image" loading="lazy" src="${this.type == "local" ? `/local/image?id=${encodeURIComponent(this.data.name)}` : this.data.logo.thumb_320x180}"/>` :
-        html`<div class="local-cover"><p>${this.data.name}</p></div>`
-      }
-      
-      ${ this.type != "local" ? html`
-      <p class="version">
-        ${this.data.submitted_by.username} ${this.data.modfile.version !== null && this.data.modfile.version.split('v').length == 1 ? " | v" : this.data.modfile.version ? " | " : ""}${this.data.modfile.version}
-        ${html` | <time-ago datetime="${new Date(this.data.modfile.date_added * 1000).toString()}"></time-ago>`}
-      </p>
-      <!-- <p class="stats"><img src="bxs_upvote.svg"/>${this.data.stats.ratings_positive} <img src="bxs_downvote.svg"/> ${this.data.stats.ratings_negative}</p> -->
-      <p class="size">${(this.data.modfile.filesize / 1024 / 1024).toFixed(0)}mb</p>
-      
-      <div class="button-container ${this.downloading ? "active" : ""}">
-      ${!this.downloading ? html`
-      <div class="row">
-      <div title="Download ${this.data.name}" class="button download" @click=${() => {this.downloadFile(this.data.id)}}>
-      <img src="download_icon.svg"/>
-      </div>
-      
-      <div title="Open ${this.data.name} page on mod.io" class="button webpage">
-        <a href="https://mod.io/g/skaterxl/m/${this.data.name_id}" target="_blank">
-        <img src="webpage_icon.svg"/>
-        </a>
-      </div>
-      </div>
-      <div class="row">
-        <p class="description" title="${this.data.summary}">${this.data.summary}</p>
-      </div>
-      <div class="rating">
-        ${this.liking ? html`
-          <loader-animation></loader-animation>
-        ` :
-        html`
-          <div class="button ${window.user_ratings[this.data.id] == 1 ? "active" : ""}" title="Like ${this.data.name}" @click=${() => { window.user_ratings[this.data.id] == 1 ? this.removeLike() : this.like() }}><img src="like.svg"/></div>
-          <div class="button ${window.user_ratings[this.data.id] == -1 ? "active" : ""}" title="Dislike ${this.data.name}" @click=${() => { window.user_ratings[this.data.id] == -1 ? this.removeLike() : this.dislike() }}><img src="dislike.svg"/></div>
-        `
-      }
-      </div>
-      <div class="subscribe">
-        ${this.subscribing ? html`
-            <loader-animation></loader-animation>
-          ` :
-          window.user_subscriptions[this.data.id] ? html`
-            <div class="text-button active" @click=${() => {this.subscribe(true)}}><p title="Unsubscribe to ${this.data.name} on mod.io">unsubscribe</p></div>
-          `
-          : html`
-            <div class="text-button" @click=${() => {this.subscribe()}}><p title="Subscribe to ${this.data.name} on mod.io">subscribe</p></div>
-          `
-        }        
-      </div>
-      ` : html`
-      <div class="state-container">
-      <p class="state">${this.downloading ? this.extracting ? "Extracting..." : "Downloading..." : ""}</p>
-      <p class="download-percentage">${this.percentage.toFixed(0)}%</p>
-      </div>
-      `}
-      </div>
-      ` : html`
-      <p class="size">${(this.data.size / 1024 / 1024).toFixed(0)}mb</p>
-      <div class="button-container ${this.deleting ? "active" : ""} ${this.type}">
-        <div class="row">
-          <div title="Delete ${this.data.name}" class="button delete" @click=${() => {this.deleteFile(this.data)}}>
-          <img src="delete_icon.svg"/>
-          </div>
-          <div title="Open ${this.data.name} folder" class="button open" @click=${() => {this.openFile(this.data)}}>
-          <img src="folder_icon.svg"/>
-          </div>
-        </div>
-      </div>
-      `}
-      <div class="gradient-bg"></div>    
+		<p class="title">${this.data.name}</p>
+		${
+			(this.type == "local" && this.data.image) || this.type != "local" ? 
+			html`<img class="image" loading="lazy" src="${this.type == "local" ? `/local/image?id=${encodeURIComponent(this.data.name)}` : this.data.logo.thumb_320x180}"/>` :
+			html`<div class="local-cover"><p>${this.data.name}</p></div>`
+		}
+		
+		${this.type != "local" ? html`		
+		<p class="version">
+			${this.data.submitted_by.username} ${this.data.modfile.version !== null && this.data.modfile.version.split('v').length == 1 ? " | v" : this.data.modfile.version ? " | " : ""}${this.data.modfile.version}
+			${html` | <time-ago datetime="${new Date(this.data.modfile.date_added * 1000).toString()}"></time-ago>`}
+		</p>
+		<!-- <p class="stats"><img src="bxs_upvote.svg"/>${this.data.stats.ratings_positive} <img src="bxs_downvote.svg"/> ${this.data.stats.ratings_negative}</p> -->
+		<p class="size">${this.getFileSize(this.data.modfile.filesize)}</p>
+		
+		<div class="button-container ${this.downloading ? "active" : ""}">
+		${!this.downloading ? html`
+		<div class="row">
+		<div title="Download ${this.data.name}" class="button download" @click=${() => { window.actualTab == "mods" ? this.getFiles(this.data.id) : this.downloadFile(this.data.id) }}>
+		<img src="download_icon.svg"/>
+		</div>
+		
+		<div title="Open ${this.data.name} page on mod.io" class="button webpage">
+			<a href="https://mod.io/g/skaterxl/m/${this.data.name_id}" target="_blank">
+			<img src="webpage_icon.svg"/>
+			</a>
+		</div>
+		</div>
+		<div class="row">
+			<p class="description" title="${this.data.summary}">${this.data.summary}</p>
+		</div>
+		<div class="rating">
+			${this.liking ? html`
+			<loader-animation></loader-animation>
+			` :
+			html`
+			<div class="button ${window.user_ratings[this.data.id] == 1 ? "active" : ""}" title="Like ${this.data.name}" @click=${() => { window.user_ratings[this.data.id] == 1 ? this.removeLike() : this.like() }}><img src="like.svg"/></div>
+			<div class="button ${window.user_ratings[this.data.id] == -1 ? "active" : ""}" title="Dislike ${this.data.name}" @click=${() => { window.user_ratings[this.data.id] == -1 ? this.removeLike() : this.dislike() }}><img src="dislike.svg"/></div>
+			`
+		}
+		</div>
+		<div class="subscribe">
+			${this.subscribing ? html`
+				<loader-animation></loader-animation>
+			` :
+			window.user_subscriptions[this.data.id] ? html`
+				<div class="text-button active" @click=${() => {this.subscribe(true)}}><p title="Unsubscribe to ${this.data.name} on mod.io">unsubscribe</p></div>
+			`
+			: html`
+				<div class="text-button" @click=${() => {this.subscribe()}}><p title="Subscribe to ${this.data.name} on mod.io">subscribe</p></div>
+			`
+			}        
+		</div>
+		` : html`
+		<div class="state-container">
+		<p class="state">${this.downloading ? this.extracting ? "Extracting..." : "Downloading..." : ""}</p>
+		<p class="download-percentage">${this.percentage.toFixed(0)}%</p>
+		</div>
+		`}
+		</div>
+		` : html`
+		${window.actualTab != "mods" ? html`<p class="size">${this.getFileSize(this.data.size)}</p>` : ''}
+		<div class="button-container ${this.deleting ? "active" : ""} ${this.type}">
+			<div class="row">
+			<div title="Delete ${this.data.name}" class="button delete" @click=${() => {this.deleteFile(this.data)}}>
+			<img src="delete_icon.svg"/>
+			</div>
+			<div title="Open ${this.data.name} folder" class="button open" @click=${() => {this.openFile(this.data)}}>
+			<img src="folder_icon.svg"/>
+			</div>
+			</div>
+		</div>
+		`}
+		<div class="gradient-bg"></div>    
       </div>
       `;
     }
