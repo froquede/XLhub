@@ -149,6 +149,7 @@
         .modio-token.disabled, .umm-install.disabled, .modal.disabled {
             z-index: -1;
             background: rgba(0, 0, 0, 0);
+            display: none;
         }
 
         .modio-token .content, .umm-install .content, .modal .content {
@@ -317,6 +318,10 @@
         button:hover {
             transform: scale(1.05);
             transition: .2s ease all;
+        }
+
+        .disabled loader-animation {
+            display: none;
         }
 
         loader-animation.disabled {
@@ -592,9 +597,9 @@
             <div class="center">
                 <h3 class="active js-change-tab" data-tab="maps">Maps</h3>
                 <h3 class="js-change-tab" data-tab="mods">Mods</h3>
+                <h3 class="js-change-tab" data-tab="sounds">Sounds</h3>
                 <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Gear</h3>
                 <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Stats</h3>
-                <h3 class="disabled" title="If you have interest on this tool being expanded leave a comment on mod.io or send me a message">Sounds</h3>
             </div>
         </div>
         <div class="left">
@@ -713,7 +718,7 @@
                     <img src="./search.svg"/>
                 </div>
             </div>
-            <img title="Refresh mod.io maps" class="refresh js-refresh-modio" src="refresh_icon.svg"/>
+            <img title="Refresh mod.io mods" class="refresh js-refresh-modio" src="refresh_icon.svg"/>
         </div>
         <div class="card-container mod-io-container loading dragscroll">
             <loader-animation></loader-animation>
@@ -730,7 +735,46 @@
                     <img class="js-search-local-img" src="./search.svg"/>
                 </div>
             </div>
-            <img title="Refresh local maps" class="refresh js-refresh-local" src="refresh_icon.svg"/>
+            <img title="Refresh local mods" class="refresh js-refresh-local" src="refresh_icon.svg"/>
+        </div>
+        <div class="card-container local-container loading dragscroll">
+            <loader-animation></loader-animation>
+            <p class="no-data hidden">No results found</p>
+        </div>
+    </div>
+
+    <div class="sounds-content tab" data-tab="sounds">
+        <div class="sub-header">
+            <h2 class="js-scrollstart-modio" title="Scroll to the start">Mod.io sounds</h2>
+            <div class="filter">
+                <div class="js-filter card active __desc" data-filter="date_updated" type="modio">Date</div>
+                <div class="js-filter card" data-filter="name" type="modio">Name</div>
+                <div class="js-filter card" data-filter="popular" type="modio">Popular</div>
+                <div class="js-filter card" data-filter="downloads" type="modio">Downloads</div>
+                <div class="js-filter card" data-filter="rating" type="modio">Rating</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-modio"/>
+                    <img src="./search.svg"/>
+                </div>
+            </div>
+            <img title="Refresh mod.io sounds" class="refresh js-refresh-modio" src="refresh_icon.svg"/>
+        </div>
+        <div class="card-container mod-io-container loading dragscroll">
+            <loader-animation></loader-animation>
+        </div>
+        
+        <div class="sub-header">
+            <h2 class="js-scrollstart-local" title="Scroll to the start">Local sounds</h2>
+            <div class="filter">
+                <div class="js-filter card active __desc" data-filter="mtimeMs" type="local">Date</div>
+                <div class="js-filter card" data-filter="size" type="local">Size</div>
+                <div class="js-filter card" data-filter="name" type="local">Name</div>
+                <div class="search_bar">
+                    <input placeholder="Search" class="js-search-local"/>
+                    <img class="js-search-local-img" src="./search.svg"/>
+                </div>
+            </div>
+            <img title="Refresh local sounds" class="refresh js-refresh-local" src="refresh_icon.svg"/>
         </div>
         <div class="card-container local-container loading dragscroll">
             <loader-animation></loader-animation>
@@ -739,7 +783,7 @@
     </div>
 
     <div class="fixed-version">
-        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.5.0</p>
+        <p class="version">SkaterXL v<span class="js-xl-version"></span> | XLhub v1.6.0</p>
     </div>
 </body>
 <script src="./dragscroll.js"></script>

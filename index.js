@@ -17,7 +17,8 @@ module.exports = (app_path, notification) => {
 	const glob = require("glob");
 	const path = require("path");
 	let maps_path = os.homedir() + "\\Documents\\SkaterXL\\Maps\\";
-	maps_path = maps_path.split("\\").join("/");
+	maps_path = maps_path.split("\\\\").join("\\").split("\\").join("/");
+
 	if (!global.config.maps_path) global.set("maps_path", maps_path);
 	
 	last_maps = {};
@@ -303,7 +304,7 @@ module.exports = (app_path, notification) => {
 			
 			let count = 0;
 			
-			request(file.download.binary_url, {timeout: 20e3}).on( 'response', function ( data ) {
+			request(file.download.binary_url, {timeout: 60e3}).on( 'response', function ( data ) {
 				total = +data.headers['content-length'];
 			}).on('data', function (chunk) {
 				data += chunk.length;
@@ -590,9 +591,11 @@ module.exports = (app_path, notification) => {
 	}
 
 	const { dialog } = require('electron');
-	function askPath() {
+	function askPath(openAt) {
 		return new Promise((resolve, reject) => {
-			dialog.showOpenDialog({properties: ['openDirectory']}).then(folder => {
+			let props = { properties: ['openDirectory'] };
+			if(openAt) props.defaultPath = openAt;
+			dialog.showOpenDialog(props).then(folder => {
 				if(!folder.canceled) {
 					resolve(folder.filePaths[0]);
 				}
@@ -604,16 +607,17 @@ module.exports = (app_path, notification) => {
 	}
 
 	app.get('/internal/path', (req, res) => {
-		askPath().then(path => {
-			let p = (path + '\\').split("\\").join("/");
+		askPath(global.config.maps_path).then(path => {
+			let p = (path + '\\').split('\\\\').join('\\').split("\\").join("/");
 			global.set("maps_path", p)
 			res.status(200).send({ path: p });
 		}).catch(() => {res.status(444).send({})});
 	});
 
 	app.get('/internal/gamePath', (req, res) => {
-		askPath().then(path => {
+		askPath(global.config.gamePath).then(path => {
 			let p = path + '\\';
+			p = p.split('\\\\').join('\\');
 			global.delete("gameVersion");
 			global.set("gamePath", p)
 			global.getGameInfo();

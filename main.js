@@ -3,9 +3,13 @@ if (require('electron-squirrel-startup')) return;
 
 require("./config.js");
 require("./logger.js");
-const { app, Tray, Menu, nativeImage, BrowserWindow, Notification } = require('electron')
+const { app, Tray, Menu, nativeImage, BrowserWindow, Notification, protocol, shell } = require('electron')
 const fs = require('fs');
 const os = require('os');
+
+protocol.registerSchemesAsPrivileged([
+    { scheme: 'xlhub', privileges: { secure: false, standard: true, bypassCSP: true } }
+]);
 
 require('node-netstat')({
     limit: 1,
@@ -130,9 +134,7 @@ function init() {
             webPreferences: {},
             icon: nativeImage.createFromPath(path.resolve(app_path, './webapp/XLhubIcon.ico'))
         });
-        mainWindow.webContents.setFrameRate(60);
-        //mainWindow.resizable = false;
-        mainWindow.loadURL('http://localhost:420')
+
         mainWindow.setMenuBarVisibility(false);
         
         if (process.platform === 'win32')
@@ -140,10 +142,12 @@ function init() {
             app.setAppUserModelId(app.name);
         }
         
-        mainWindow.webContents.on('new-window', (e, url) => {
-            e.preventDefault();
-            require('electron').shell.openExternal(url);
+        mainWindow.webContents.setWindowOpenHandler((details) => {
+            shell.openExternal(details.url);
+            return { action: "deny" };
         });
+
+        mainWindow.loadURL('http://localhost:420');
     }
     
     let icon;
@@ -220,8 +224,22 @@ function init() {
                         click() {
                             openPath(os.homedir() + "\\Documents\\SkaterXL\\XLGearModifier\\Asset Packs")
                         }
+                    },
+                    {
+                        id: 'xlod',
+                        label: 'XLObjectDropper assets',
+                        click() {
+                            openPath(os.homedir() + "\\Documents\\SkaterXL\\XLObjectDropper\\Asset Packs")
+                        }
                     }
                 ]
+            },
+            {
+                id: "milky-docs",
+                label: "Mod docs by Milky",
+                click() {
+                    shell.openExternal("https://skaterxl-mod-docs.vercel.app/");
+                }
             },
             {
                 label: 'Quit',
@@ -261,9 +279,13 @@ function init() {
 }
 
 function openPath(path) {
+    let windowsPath = path.split("/").join("\\");
+    windowsPath = windowsPath.split('\\\\').join('\\');
+    console.log(path, windowsPath);
+
     fs.stat(path, err => {
         if(!err) {
-            require('child_process').exec(`explorer.exe "${path.split("/").join("\\")}"`);
+            require('child_process').exec(`explorer.exe "${windowsPath}"`);
         }
     })
 }
