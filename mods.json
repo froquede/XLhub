@@ -116,6 +116,17 @@
         }
     },
     {
+        "name": "XLControllerRotation-CV",
+        "id": 3887512,
+        "url": "xlcontrollerrotation-community-version",
+        "versions": {
+            "1.0.0": [
+                "1.2.6.0",
+                "1.2.7.8"
+            ]
+        }
+    },
+    {
         "name": "DeckFX",
         "id": 539230,
         "url": "deckfx",
