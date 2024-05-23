@@ -104,7 +104,7 @@ function toggleModioSorting() {
 function requestSecurityCode(email) {
     const data = new URLSearchParams();
     data.append("email", email);
-    fetch("https://api.mod.io/v1/oauth/emailrequest?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
+    fetch("https://u-4054039.modapi.io/v1/oauth/emailrequest?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
     method: 'POST',
     body: data,
     headers: {
@@ -130,7 +130,7 @@ function requestSecurityCode(email) {
 function confirmSecurityCode(code) {
     const data = new URLSearchParams();
     data.append("security_code", code);
-    fetch("https://api.mod.io/v1/oauth/emailexchange?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
+    fetch("https://u-4054039.modapi.io/v1/oauth/emailexchange?api_key=90e38aa08fbdc38b9c2e8d3e4cf3c914", {
     method: 'POST',
     body: data,
     headers: {
@@ -153,11 +153,21 @@ function confirmSecurityCode(code) {
 })
 }
 
+let types = {
+    "map": "maps",
+    "scripts": "mods",
+    "sounds": "sounds"
+}
+
 socket.on("download-percentage", message => { window.on("download-percentage", message); })
 socket.on("extracting-download", message => { window.on("extracting-download", message); })
 socket.on("extracting-finished", message => { 
-    window.on("extracting-finished", message);
+    document.querySelector(".loading-install")?.classList.add("disabled");
+    if (types[message.type] != window.actualTab) {
+        document.querySelector(`[data-tab="${types[message.type]}"]`)?.click();
+    }
     getLocal();
+    window.on("extracting-finished", message);
 });
 socket.on("mod-list-updated", message => {
     window.config.mods = message;
@@ -188,16 +198,33 @@ function getModio(page = 0, refresh) {
     }
     else first_load = false;
     
-    let url = "/modio/" + window.actualTab + "?page=" + page + "&token=" + localStorage.getItem("modio-token") + "&filter=" + modio_filter.filter + "&sorting=" + modio_filter.sorting + "&search=" + modio_search;
+    let url = "/modio/" + window.actualTab + "?page=" + page + "&token=" + localStorage.getItem("modio-token") + "&filter=" + modio_filter.filter + "&sorting=" + modio_filter.sorting + "&search=" + window.modio_search;
     window.fetch(url, { signal }).then(res => res.json()).then(data => {    
+        if (signal.aborted) return;
+
+        console.log(data);
+
         if(data.response_status && data.response_status == 401 && localStorage.getItem("modio-token")) {
             localStorage.clear();
             window.location.reload();
         }
 
         for(let map of data.data) {
-            modio_data.push(html`<map-card .data='${map}' data-id="${map.id}"></map-card>`);
+            if (window.actualTab == "maps") {
+                if((map.stats.ratings_display_text.toLowerCase() == "very negative" || map.stats.ratings_display_text.toLowerCase() == "overwhelmingly negative") && map.stats.ratings_total >= 10) {
+    
+                }
+                else {
+                    if (!map.dependencies) {
+                        modio_data.push(html`<map-card .data='${map}' data-id="${map.id}"></map-card>`);
+                    }
+                }
+            }
+            else {
+                modio_data.push(html`<map-card .data='${map}' data-id="${map.id}"></map-card>`);
+            }
         }
+        
 
         if (data.data.length == 0 && page == 0) {
             modio_data.push(html`<p class="no-data">No results found</p>`);
@@ -214,10 +241,8 @@ function getModio(page = 0, refresh) {
     });
 }
 
-function vrender(data, container) {
-    setTimeout(() => {
-        render(data, container);
-    }, 0);
+function vrender(data, container, time = 0) {
+    render(data, container);
 }
 
 function scrollStartModio() {
@@ -243,7 +268,7 @@ function getLocal(refresh = false) {
         else nodata.classList.add("hidden");
 
         container.classList.remove("loading");
-        vrender(result, container);
+        vrender(result, container, 10);
         
         if(refresh) scrollStartLocal();
         
@@ -278,16 +303,16 @@ function LoadMore(element) {
 }
 
 function getMe() {
-    window.fetch("https://api.mod.io/v1/me", { headers: { Authorization: "Bearer " + localStorage.getItem("modio-token") }}). then(res => res.json()).then(data => {
+    window.fetch("https://u-4054039.modapi.io/v1/me", { headers: { Authorization: "Bearer " + localStorage.getItem("modio-token") }}). then(res => res.json()).then(data => {
     document.querySelector(".js-username").innerHTML = data.username;
     document.querySelector(".js-avatar").setAttribute("src", data.avatar.thumb_100x100);
     document.querySelector(".avatar.hidden").classList.remove("hidden");
 });
 }
 
-let modio_search = "";
+window.modio_search = "";
 function searchModio() {
-    modio_search = document.querySelector('[data-tab="' + window.actualTab + '"] .js-search-modio').value;
+    window.modio_search = document.querySelector('[data-tab="' + window.actualTab + '"] .js-search-modio').value;
     actual_page = 0;
     getModio(actual_page, true);
 }
@@ -335,9 +360,13 @@ function getSubscriptions() {
     });
 }
 
-document.querySelectorAll(".js-search-modio").forEach(el => el.addEventListener("keydown", (evt) => {
-    if(evt.key === "Enter") searchModio();
-}));
+document.querySelectorAll(".js-search-modio").forEach(el => {
+    el.addEventListener("keydown", (evt) => {
+        if(evt.key === "Enter") searchModio();
+    })
+
+    el.parentElement.querySelector('img').addEventListener("click", searchModio);
+});
 
 document.querySelectorAll(".js-search-local").forEach(el => el.addEventListener("keydown", (evt) => {
     if(evt.key === "Enter") searchLocal();

@@ -313,6 +313,7 @@ export class mapCard extends LitElement {
     this.extracting = false;
 
 	this.setDownloading = this.setDownloading.bind(this);
+	this.getFiles = this.getFiles.bind(this);
   }
   
   firstUpdated() {
@@ -345,14 +346,14 @@ export class mapCard extends LitElement {
     }
   }
   
-  downloadFile(id) {
-    fetch(`/modio/download`, {
+  downloadFile(id, file) {
+    fetch(`/modio/download?type=${urls[window.actualTab]}`, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id, token: localStorage.getItem("modio-token") })
+      body: JSON.stringify({id, file, token: localStorage.getItem("modio-token") })
     }).then(res => {
       console.dir(res);
       if(res.status == 200) {
@@ -370,16 +371,22 @@ export class mapCard extends LitElement {
   }
 
   getFiles(id) {
-	fetch(`/modio/files?id=${id}&token=${localStorage.getItem("modio-token")}`, {
+    window.openFileListModalLoading();
+    fetch(`/modio/files?id=${id}&token=${localStorage.getItem("modio-token")}`, {
 		method: "GET",
 		headers: {
-		  'Accept': 'application/json',
-		  'Content-Type': 'application/json'
+			'Accept': 'application/json',
+			'Content-Type': 'application/json'
 		}
-	}).then(res => {
-		window.openFileListModalLoading();
+    }).then(res => {
 		res.json().then(data => {
-			window.openFileListModal(data);
+			if(data.data.length > 1) {
+				window.openFileListModal(data, id, this);
+			}
+			else {
+				this.downloadFile(id);
+				window.closeModal();
+			}
 		});
     });
   }
@@ -553,7 +560,7 @@ export class mapCard extends LitElement {
 		<div class="button-container ${this.downloading ? "active" : ""}">
 		${!this.downloading ? html`
 		<div class="row">
-		<div title="Download ${this.data.name}" class="button download" @click=${() => { window.actualTab == "mods" ? this.getFiles(this.data.id) : this.downloadFile(this.data.id) }}>
+		<div title="Download ${this.data.name}" class="button download" @click=${() => { this.getFiles(this.data.id); }}>
 		<img src="download_icon.svg"/>
 		</div>
 		

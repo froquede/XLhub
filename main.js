@@ -36,7 +36,15 @@ let searching = false;
 function findGameSteam(menu) {
 	if (global.config.gamePath) {
         console.log(global.config.gamePath);
-		return getGameVersion(menu);
+        return fs.stat(global.config.gamePath, (err, stats) => {
+            if (err) {
+                delete global.config.gamePath; // folder doesnt exist anymore
+                findGameSteam(menu);
+            }
+            else {
+                getGameVersion(menu);
+            }
+        })
 	}
 
 	searching = true;
@@ -74,7 +82,7 @@ function getGameVersion(menu) {
             menu.getMenuItemById('umm').enabled = false;
 		}
 		else {
-            console.log(err);
+            console.log(err, "error");
             setTimeout(() => { getGameVersion(menu); }, 5e3);
         }
 	})
@@ -179,6 +187,14 @@ function init() {
                             });
                         },
                         enabled: false
+                    }, {
+                        id: 'modio-logout',
+                        label: 'Logout mod.io',
+                        click() {
+                            show();
+                            mainWindow.webContents.executeJavaScript('LogoutModio()');
+                        },
+                        enabled: true
                     }
                 ]
             },
@@ -236,9 +252,9 @@ function init() {
             },
             {
                 id: "milky-docs",
-                label: "Mod docs by Milky",
+                label: "Modding guides by Milky",
                 click() {
-                    shell.openExternal("https://skaterxl-mod-docs.vercel.app/");
+                    shell.openExternal("https://skatebit.vercel.app/skaterxl/guides");
                 }
             },
             {
@@ -263,6 +279,7 @@ function init() {
     }
     
     function show() {
+        try { global.updateModsGithub(); } catch(err) {}
         mainWindow.show();
         mainWindow.focus();
     }
