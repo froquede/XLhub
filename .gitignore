@@ -3,5 +3,6 @@ out
 app.log
 config.json
 mods_backup.json
+sounds_backup.json
 tmp
 *.zip
