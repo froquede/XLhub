@@ -2,7 +2,7 @@
 
 # XLhub
 ## Releases
-- Latest version: [v1.6.0](https://github.com/roquef/XLhub/releases/download/v1.6.0/XLhub-1.6.0.zip)
+- Latest version: [v1.7.0](https://github.com/roquef/XLhub/releases/download/v1.7.0/XLhub-1.7.0.zip)
 
 ## Dev
 

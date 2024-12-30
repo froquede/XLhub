@@ -75,7 +75,7 @@ function getGameVersion(menu) {
             console.log(stdout, stdout.split(" ").join("").length);
 
             menu.getMenuItemById('umm').enabled = true;
-			if(stdout.split('2019.4.40.50731').length > 1) return global.set('gameVersion', '1.2.7.8');
+			if(stdout.split('2019.4.40.50731').length > 1) return global.set('gameVersion', '1.2.10.4');
 			if(stdout.split('2019.3.15.65342').length > 1) return global.set('gameVersion', '1.2.2.8');
 
 			global.set('gameVersion', 'unknown');

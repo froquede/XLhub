@@ -465,5 +465,15 @@
                 "1.2.7.8"
             ]
         }
+    },
+    {
+        "name": "XL Multiplayer Map Vote",
+        "id": 4466553,
+        "url": "xl-multiplayer-map-vote",
+        "versions": {
+            "1.0.0": [
+                "1.2.2.8"
+            ]
+        }
     }
 ]

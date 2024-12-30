@@ -4,7 +4,7 @@
   "description": "XLhub",
   "keywords": [],
   "main": "./main.js",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "froquede",
   "scripts": {
     "start": "electron-forge start",
@@ -29,12 +29,12 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.4.2",
-    "@electron-forge/maker-deb": "^6.4.2",
-    "@electron-forge/maker-rpm": "^6.4.2",
-    "@electron-forge/maker-squirrel": "^6.4.2",
-    "@electron-forge/maker-zip": "^6.4.2",
-    "electron": "^29.0.1"
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "electron": "^33.2.1"
   },
   "config": {
     "forge": {
@@ -47,7 +47,7 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "XLhub",
-            "version": "1.6.0",
+            "version": "1.7.0",
             "loadingGif": "./thumb.png"
           }
         },
@@ -62,7 +62,7 @@
           "name": "@electron-forge/maker-deb",
           "config": {
             "name": "XLhub",
-            "version": "1.6.0"
+            "version": "1.7.0"
           }
         },
         {

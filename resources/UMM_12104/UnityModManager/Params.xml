@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Param xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Hotkey>
+    <keyCode>None</keyCode>
+    <modifiers>0</modifiers>
+  </Hotkey>
+  <CheckUpdates>1</CheckUpdates>
+  <ShowOnStart>0</ShowOnStart>
+  <WindowWidth>960</WindowWidth>
+  <WindowHeight>720</WindowHeight>
+  <UIScale>0.938829839</UIScale>
+  <UIFont>Arial</UIFont>
+  <LastUpdateCheck>2024-12-30T16:14:46.8760973-03:00</LastUpdateCheck>
+  <ModParams>
+    <Mod Id="better-replay" Enabled="true">
+      <Hotkey>
+        <keyCode>None</keyCode>
+        <modifiers>0</modifiers>
+      </Hotkey>
+    </Mod>
+  </ModParams>
+</Param>
