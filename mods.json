@@ -256,6 +256,16 @@
         }
     },
     {
+        "name": "Multiplayer Events",
+        "id": 6229492,
+        "url": "multiplayer-events",
+        "versions": {
+            "0.2.0": [
+                "1.2.2.8"
+            ]
+        }
+    },
+    {
         "name": "Multiplayer++",
         "id": 2154245,
         "url": "multiplayer",
