@@ -44,7 +44,7 @@ module.exports = (app_path, notification) => {
 	});
 
 	function updateModsGithub() {
-		request("https://raw.githubusercontent.com/roquef/XLhub/main/mods.json", (err, res, body) => {
+		request("https://raw.githubusercontent.com/froquede/XLhub/main/mods.json", (err, res, body) => {
 			if(res.statusCode == 200) {
 				try {
 					body = JSON.parse(body);
@@ -66,7 +66,7 @@ module.exports = (app_path, notification) => {
 			}
 		});
 
-		request("https://raw.githubusercontent.com/roquef/XLhub/main/sounds.json", (err, res, body) => {
+		request("https://raw.githubusercontent.com/froquede/XLhub/main/sounds.json", (err, res, body) => {
 			if(res.statusCode == 200) {
 				try {
 					body = JSON.parse(body);
@@ -97,12 +97,14 @@ module.exports = (app_path, notification) => {
 			glob(global.config.maps_path + "**/*", { dot: true }, async (err, files) => {
 				if(!err) {
 					let maps = {};
-					for(file of files) {
+					await Promise.all(files.map(async file => {
 						if(path.extname(file) == "") {
 							const stat = await fs.promises.lstat(path.resolve(global.config.maps_path, file));
 							let name = file.toLowerCase().split(global.config.maps_path.toLowerCase()).join("");
 							if(stat.isFile()) maps[name] = { file, name, ...stat };
 						}
+					}));
+					for(const file of files) {
 						if(path.extname(file) == ".jpg" || path.extname(file) == ".png") {
 							let name = file.toLowerCase().split(".jpg").join("").split(".png").join("");
 							name = name.split(global.config.maps_path.toLowerCase()).join("");
@@ -135,23 +137,25 @@ module.exports = (app_path, notification) => {
 					glob(_path + "\\**\\*", { dot: true }, async (err, files) => {
 						if(!err) {
 							let mods = {};
-							for(file of files) {
-								if(file.toLowerCase().split('info.json').length > 1) {
-									try {
-										let info = require(file);
-										let folder = file.split('/Info.json')[0];
-										let stat = await fs.promises.lstat(folder);
+							let infoFiles = files.filter(f => f.toLowerCase().split('info.json').length > 1);
+							let entries = await Promise.all(infoFiles.map(async file => {
+								try {
+									let info = JSON.parse(fs.readFileSync(file, 'utf8'));
+									let folder = file.split('/Info.json')[0];
+									let stat = await fs.promises.lstat(folder);
 
-										mods[info.Id] = {
-											name: info.Id,
-											version: info.Version,
-											file: folder,
-											...stat,
-											...info
-										}
-									}
-									catch(err) {}
+									return [info.Id, {
+										name: info.Id,
+										version: info.Version,
+										file: folder,
+										...stat,
+										...info
+									}];
 								}
+								catch(err) { return null; }
+							}));
+							for(const entry of entries) {
+								if(entry) mods[entry[0]] = entry[1];
 							}
 
 							last_mods = mods;
@@ -163,6 +167,7 @@ module.exports = (app_path, notification) => {
 							});
 							resolve(Object.fromEntries(result));
 						}
+						else reject(err);
 					});
 				}
 				else reject();
@@ -179,18 +184,20 @@ module.exports = (app_path, notification) => {
 					glob(_path + "\\**\\*", { dot: true }, async (err, files) => {
 						if(!err) {
 							let sounds = {};
-							for(file of files) {
+							let soundEntries = await Promise.all(files.map(async file => {
 								try {
 									let stat = await fs.promises.lstat(file);
 									let name = file.split('/').join('\\').split(_path + '\\').join('');
-
-									sounds[name] = {
+									return [name, {
 										name,
 										file,
 										...stat
-									}
+									}];
 								}
-								catch(err) {}
+								catch(err) { return null; }
+							}));
+							for(const entry of soundEntries) {
+								if(entry) sounds[entry[0]] = entry[1];
 							}
 							
 							last_sounds = sounds;
@@ -202,6 +209,7 @@ module.exports = (app_path, notification) => {
 							});
 							resolve(Object.fromEntries(result));
 						}
+						else reject(err);
 					});
 				}
 				else reject();
@@ -712,7 +720,7 @@ module.exports = (app_path, notification) => {
 	});
 
 	app.get('/internal/config', (req, res) => {
-		res.status(200).send({ ...global.config, mods });
+		res.status(200).send({ ...global.config, mods: global.mods });
 	});
 
 	app.post('/modio/download', (req, res) => {

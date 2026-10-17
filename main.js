@@ -65,8 +65,11 @@ function findGameSteam(menu) {
 
 let last_menu;
 function getGameVersion(menu) {
-    let command = `wmic datafile where name='${global.config.gamePath.split('\\').join('\\\\')}\\\\SkaterXL.exe' get Version`;
-    command = command.split('\\\\\\\\').join('\\\\');
+    // Read the exe's version resource via PowerShell (wmic is deprecated/removed on newer Windows).
+    // Unity writes the engine version (e.g. 2019.4.40.50731) into both FileVersion and ProductVersion,
+    // so emit both and keep the existing substring matching below.
+    let exe = (global.config.gamePath + "\\SkaterXL.exe").split("\\\\").join("\\");
+    let command = `powershell -NoProfile -Command "try { $v = (Get-Item -LiteralPath '${exe}' -ErrorAction Stop).VersionInfo; Write-Output ($v.FileVersion + ' ' + $v.ProductVersion) } catch { exit 1 }"`;
 
     if(!menu) menu = last_menu;
 
