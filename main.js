@@ -69,7 +69,10 @@ function getGameVersion(menu) {
     // Unity writes the engine version (e.g. 2019.4.40.50731) into both FileVersion and ProductVersion,
     // so emit both and keep the existing substring matching below.
     let exe = (global.config.gamePath + "\\SkaterXL.exe").split("\\\\").join("\\");
-    let command = `powershell -NoProfile -Command "try { $v = (Get-Item -LiteralPath '${exe}' -ErrorAction Stop).VersionInfo; Write-Output ($v.FileVersion + ' ' + $v.ProductVersion) } catch { exit 1 }"`;
+    // Use the *Raw version fields: their revision matches what wmic's Version returned
+    // (e.g. 2019.3.15.65342), which is what the build-string matching below expects.
+    // The plain FileVersion/ProductVersion strings mangle the revision (e.g. .5898046).
+    let command = `powershell -NoProfile -Command "try { $v = (Get-Item -LiteralPath '${exe}' -ErrorAction Stop).VersionInfo; Write-Output ($v.FileVersionRaw.ToString() + ' ' + $v.ProductVersionRaw.ToString()) } catch { exit 1 }"`;
 
     if(!menu) menu = last_menu;
 
