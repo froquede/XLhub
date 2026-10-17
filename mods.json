@@ -513,9 +513,9 @@
         }
     },
     {
-        "name": "XL Landing Editor by LL",
+        "name": "XLL Customizer",
         "id": 6409015,
-        "url": "xl-landing-editor-by-ll",
+        "url": "xll-customizer",
         "versions": {
             "0.9.4.4": [],
             "0.9.0.1": [],
