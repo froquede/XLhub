@@ -503,5 +503,107 @@
                 "1.2.2.8"
             ]
         }
+    },
+    {
+        "name": "Throwdown Mod",
+        "id": 6456637,
+        "url": "throwdown-mod",
+        "versions": {
+            "1.2.11": []
+        }
+    },
+    {
+        "name": "XL Landing Editor by LL",
+        "id": 6409015,
+        "url": "xl-landing-editor-by-ll",
+        "versions": {
+            "0.9.4.4": [],
+            "0.9.0.1": [],
+            "0.8.2.2": [],
+            "0.8.2": [],
+            "0.5.0": [],
+            "0.4.0": [],
+            "0.3.4": [],
+            "0.3.3": [],
+            "0.3.2": []
+        }
+    },
+    {
+        "name": "ReplayFX",
+        "id": 6438142,
+        "url": "replayfx",
+        "versions": {
+            "2.0.0": [
+                "1.2.10.4"
+            ],
+            "1.0.0": [
+                "1.2.2.8"
+            ]
+        }
+    },
+    {
+        "name": "DECK FX V2 (Klepto/Deads)",
+        "id": 6404095,
+        "url": "deck-fx-by-klepto-v2-moreslidersyaaaaaaaay",
+        "versions": {
+            "1.6.2": [],
+            "1.6.1": [],
+            "1.4.9": [],
+            "1.4.8": []
+        }
+    },
+    {
+        "name": "Nulvex All In One",
+        "id": 6373973,
+        "url": "nulvex-all-in-one",
+        "versions": {
+            "1.0": []
+        }
+    },
+    {
+        "name": "SoundMod Tuner",
+        "id": 6310230,
+        "url": "soundmod-tuner",
+        "versions": {
+            "1.2": [],
+            "1.1": []
+        }
+    },
+    {
+        "name": "Universal Chat",
+        "id": 6284257,
+        "url": "universal-chat",
+        "versions": {
+            "1.21.1": [
+                "1.2.2.8"
+            ],
+            "1.19.0": [
+                "1.2.2.8"
+            ]
+        }
+    },
+    {
+        "name": "XL Multiplayer Chat",
+        "id": 6035222,
+        "url": "xl-multiplayer-chat",
+        "versions": {
+            "1.0": []
+        }
+    },
+    {
+        "name": "Skateparkitect",
+        "id": 5711610,
+        "url": "skateparkitect-universal-skatepark-creator",
+        "versions": {
+            "0.3.0": []
+        }
+    },
+    {
+        "name": "Left Stick Rotation Mod",
+        "id": 5298204,
+        "url": "left-stick-rotation-mod",
+        "versions": {
+            "1.0.0": []
+        }
     }
 ]
